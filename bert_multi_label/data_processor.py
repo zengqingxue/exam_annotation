@@ -93,6 +93,4 @@ def prepare_dataset():
 
 if __name__ == "__main__":
     
-    # prepare_dataset()
-
-    load_dataset()
+    prepare_dataset()
