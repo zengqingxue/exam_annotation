@@ -6,9 +6,6 @@ python run_classifier.py \
   --do_eval true \
   --do_predict true \
   --data_dir ../data/bert_multi_label_results/proc/ \
-#  --vocab_file pretrained_model/roberta_zh_l12/vocab.txt \
-#  --bert_config_file pretrained_model/roberta_zh_l12/bert_config.json \
-#  --init_checkpoint pretrained_model/roberta_zh_l12/bert_model.ckpt \
   --vocab_file pretrained_model/chinese_L-12_H-768_A-12/vocab.txt \
   --bert_config_file pretrained_model/chinese_L-12_H-768_A-12/bert_config.json \
   --init_checkpoint pretrained_model/chinese_L-12_H-768_A-12/bert_model.ckpt \
@@ -20,3 +17,6 @@ python run_classifier.py \
 
 # test bert
 python run_test.py
+#  --vocab_file pretrained_model/roberta_zh_l12/vocab.txt \
+#  --bert_config_file pretrained_model/roberta_zh_l12/bert_config.json \
+#  --init_checkpoint pretrained_model/roberta_zh_l12/bert_model.ckpt \
