@@ -5,7 +5,7 @@ export EXPORT_MODEL_DIR=./export_model/roberta_zh_l12
 
 
 python run_classifier.py \
-  --task_name=multi_label_95 \
+  --task_name=news_label_29 \
   --do_predict=true \
   --data_dir=$DATA_DIR \
   --vocab_file=$BERT_BASE_DIR/vocab.txt \

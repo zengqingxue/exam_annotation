@@ -31,6 +31,7 @@ from bert import tokenization
 import numpy as np
 from config import Config
 
+# region config flags
 config = Config()
 
 flags = tf.flags
@@ -133,6 +134,8 @@ tf.flags.DEFINE_string("master", None, "[Optional] TensorFlow master URL.")
 flags.DEFINE_integer(
     "num_tpu_cores", 8,
     "Only used if `use_tpu` is True. Total number of TPU cores to use.")
+
+# endregion
 
 
 class InputExample(object):
@@ -260,6 +263,7 @@ class Multi_Label_Processor(DataProcessor):
 
 """ 2: 标签进行one-hot编码，多分类和多标签都适用。"""
 def label_to_id(labels, label_map):
+    """一个样本的labels 是一个 []格式，如["社会","科技"]"""
     label_map_length = len(label_map)
     label_ids = [0] * label_map_length
     for label in labels:
@@ -481,11 +485,8 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
         token_type_ids=segment_ids,
         use_one_hot_embeddings=use_one_hot_embeddings)
 
-    # In the demo, we are doing a simple classification task on the entire
-    # segment.
-    #
-    # If you want to use the token-level output, use model.get_sequence_output()
-    # instead.
+    # In the demo, we are doing a simple classification task on the entire segment.
+    # If you want to use the token-level output, use model.get_sequence_output() instead.
     """ 7: 文本分类，适用对序列做池化后的输出；序列标注，适用序列输出 """
     output_layer = model.get_pooled_output()
     
@@ -557,7 +558,6 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
             (assignment_map, initialized_variable_names
              ) = modeling.get_assignment_map_from_checkpoint(tvars, init_checkpoint)
             if use_tpu:
-
                 def tpu_scaffold():
                     tf.train.init_from_checkpoint(init_checkpoint, assignment_map)
                     return tf.train.Scaffold()
@@ -576,7 +576,6 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
 
         output_spec = None
         if mode == tf.estimator.ModeKeys.TRAIN:
-
             train_op = optimization.create_optimizer(
                 total_loss, learning_rate, num_train_steps, num_warmup_steps, use_tpu)
 
@@ -586,7 +585,6 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
                 train_op=train_op,
                 scaffold_fn=scaffold_fn)
         elif mode == tf.estimator.ModeKeys.EVAL:
-            
             """ 13: 修改评估函数，计算多标签的准确率 """
             def metric_fn(per_example_loss,label_ids, probabilities,is_real_example):
                    
@@ -624,7 +622,7 @@ def main(_):
     tf.logging.set_verbosity(tf.logging.INFO)
 
     processors = {
-        "multi_label_95": Multi_Label_Processor,
+        "news_label_29": Multi_Label_Processor,
     }
 
     tokenization.validate_case_matches_checkpoint(FLAGS.do_lower_case,

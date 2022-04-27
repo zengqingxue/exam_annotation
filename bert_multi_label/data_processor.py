@@ -15,7 +15,9 @@ def load_dataset():
     
     """ 1: 读取数据 """
     print("\n读取数据 ... \n")
-    point_df = pd.read_csv(config.point_path, header=None, names=["label", "item"])
+    # point_df = pd.read_csv(config.point_path, header=None, names=["id","label", "item"])
+    point_df = pd.read_table(config.point_path, sep="\t" ,header=None, names=["id","label", "item"])
+    point_df = point_df[["label", "item"]]
     point_df.dropna(inplace=True)
     print(f"\nThe shape of the dataset : {point_df.shape}\n")
     
@@ -25,15 +27,15 @@ def load_dataset():
     mlb = MLB()
     mlb.fit(point_df["label"])
     all_class = mlb.classes_.tolist()
-    
+
     with open(config.class_path, "w",encoding='utf-8') as f:
         f.write("\n".join(all_class))
-    
-    """ 3: 划分数据集 """ 
+
+    """ 3: 划分数据集 """
     print("\n划分数据集 ... \n")
     df_train, df_test = train_test_split(point_df[:], test_size=0.2, shuffle=True)
-    df_valid, df_test = train_test_split(df_test[:], test_size=0.5, shuffle=True)    
-    
+    df_valid, df_test = train_test_split(df_test[:], test_size=0.5, shuffle=True)
+
     return df_train, df_valid, df_test
 
 
@@ -88,7 +90,9 @@ def prepare_dataset():
         text_f.close()
         token_in_f.close()
         label_f.close()
-        
+
 if __name__ == "__main__":
     
-    prepare_dataset()
+    # prepare_dataset()
+
+    load_dataset()
