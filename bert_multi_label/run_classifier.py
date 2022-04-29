@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 import sys
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" # 指定
 
 import collections
 import csv
