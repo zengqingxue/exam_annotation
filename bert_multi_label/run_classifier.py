@@ -255,7 +255,7 @@ class Multi_Label_Processor(DataProcessor):
 
     def get_labels(self):
         """
-        95 labels
+        29 labels
         """
         all_labels = open(config.class_path,encoding="utf-8").readlines()
         return [label.strip() for label in all_labels]
@@ -425,8 +425,7 @@ def file_based_input_fn_builder(input_file, seq_length, label_length,
         """Decodes a record to a TensorFlow example."""
         example = tf.parse_single_example(record, name_to_features)
 
-        # tf.Example only supports tf.int64, but the TPU only supports tf.int32.
-        # So cast all int64 to int32.
+        # tf.Example only supports tf.int64, but the TPU only supports tf.int32. So cast all int64 to int32.
         for name in list(example.keys()):
             t = example[name]
             if t.dtype == tf.int64:
@@ -516,7 +515,8 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
         
         per_example_loss = tf.reduce_mean(
             tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=label_ids), axis=-1)
-        loss = tf.reduce_mean(per_example_loss)
+        loss = tf.reduce_mean(per_example_loss,name="total_loss")
+        # tf.logging("loss为： %s",loss)
 
         return (loss, per_example_loss, logits, probs)
 
@@ -530,6 +530,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
     def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
         """The `model_fn` for TPUEstimator."""
 
+        # region 定义的estimator的模型架构  定义inference 图
         tf.logging.info("*** Features ***")
         for name in sorted(features.keys()):
             tf.logging.info("  name = %s, shape = %s" % (name, features[name].shape))
@@ -550,7 +551,11 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
         (total_loss, per_example_loss,logits, probabilities) = create_model(
             bert_config, is_training, input_ids, input_mask, segment_ids, label_ids,
             num_labels, use_one_hot_embeddings)
+        tf.logging.info("num_train_steps: %s, logits: %s, total_loss: %s",num_train_steps,logits,total_loss)
 
+        # endregion
+
+        # region 模型参数通过预训练模型进行初始化，fine-tuning
         tvars = tf.trainable_variables()
         initialized_variable_names = {}
         scaffold_fn = None
@@ -565,6 +570,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
                 scaffold_fn = tpu_scaffold
             else:
                 tf.train.init_from_checkpoint(init_checkpoint, assignment_map)
+        # endregion
 
         tf.logging.info("**** Trainable Variables ****")
         for var in tvars:
@@ -574,16 +580,29 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
             tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape,
                             init_string)
 
+        # region 执行相应的 TRAIN  EVAL PREDICT
         output_spec = None
         if mode == tf.estimator.ModeKeys.TRAIN:
+            # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+            # train_op = optimizer.minimize(
+            #     loss=total_loss, global_step=tf.train.get_global_step())
             train_op = optimization.create_optimizer(
                 total_loss, learning_rate, num_train_steps, num_warmup_steps, use_tpu)
+            logging_hook = tf.train.LoggingTensorHook({"global_step": tf.train.get_global_step(),"loss": total_loss},every_n_iter=2)
+
+            tf.logging.info("total_loss: %s, learning_rate:%s, num_train_steps: %s,use_tpu: %s",total_loss, learning_rate,num_train_steps,use_tpu )
+            tf.logging.info("全局步: %s",tf.train.get_global_step())
 
             output_spec = tf.contrib.tpu.TPUEstimatorSpec(
+            # output_spec = tf.estimator.EstimatorSpec(
                 mode=mode,
                 loss=total_loss,
                 train_op=train_op,
-                scaffold_fn=scaffold_fn)
+                training_hooks=[logging_hook],
+                scaffold_fn=scaffold_fn
+            )
+            tf.logging.info("output_spec: %s",output_spec)
+
         elif mode == tf.estimator.ModeKeys.EVAL:
             """ 13: 修改评估函数，计算多标签的准确率 """
             def metric_fn(per_example_loss,label_ids, probabilities,is_real_example):
@@ -613,6 +632,8 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
                 mode=mode,
                 predictions={"probabilities": probabilities},
                 scaffold_fn=scaffold_fn)
+        # endregion
+
         return output_spec
 
     return model_fn
@@ -620,7 +641,6 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
 
 def main(_):
     tf.logging.set_verbosity(tf.logging.INFO)
-
     processors = {
         "news_label_29": Multi_Label_Processor,
     }
@@ -643,14 +663,15 @@ def main(_):
     tf.gfile.MakeDirs(FLAGS.output_dir)
 
     task_name = FLAGS.task_name.lower()
-
     if task_name not in processors:
         raise ValueError("Task not found: %s" % task_name)
 
     processor = processors[task_name]()
-
     label_list = processor.get_labels()
     label_length = len(label_list)
+
+    tf.logging.info("label_length为: %s",label_length)
+    tf.logging.info("label_length为: %s",label_list)
 
     tokenizer = tokenization.FullTokenizer(
         vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
@@ -669,17 +690,25 @@ def main(_):
         tpu_config=tf.contrib.tpu.TPUConfig(
             iterations_per_loop=FLAGS.iterations_per_loop,
             num_shards=FLAGS.num_tpu_cores,
-            per_host_input_for_training=is_per_host))
+            per_host_input_for_training=is_per_host),
+        # 设置 资源自动增长
+        session_config = tf.ConfigProto(
+            allow_soft_placement=True, log_device_placement=True),
+
+    )
+    run_config.session_config.gpu_options.allow_growth = True
 
     train_examples = None
     num_train_steps = None
     num_warmup_steps = None
     if FLAGS.do_train:
+        tf.logging.info("00000" * 10)
         train_examples = processor.get_train_examples(FLAGS.data_dir)
         num_train_steps = int(
             len(train_examples) / FLAGS.train_batch_size * FLAGS.num_train_epochs)
         num_warmup_steps = int(num_train_steps * FLAGS.warmup_proportion)
 
+    tf.logging.info("1111"*10)
     model_fn = model_fn_builder(
         bert_config=bert_config,
         num_labels=len(label_list),
@@ -689,9 +718,10 @@ def main(_):
         num_warmup_steps=num_warmup_steps,
         use_tpu=FLAGS.use_tpu,
         use_one_hot_embeddings=FLAGS.use_tpu)
+    tf.logging.info("22222" * 10)
 
-    # If TPU is not available, this will fall back to normal Estimator on CPU
-    # or GPU.
+
+    # If TPU is not available, this will fall back to normal Estimator on CPU or GPU.
     estimator = tf.contrib.tpu.TPUEstimator(
         use_tpu=FLAGS.use_tpu,
         model_fn=model_fn,
@@ -700,6 +730,11 @@ def main(_):
         eval_batch_size=FLAGS.eval_batch_size,
         predict_batch_size=FLAGS.predict_batch_size)
 
+    tf.logging.info("num_train_steps : %s,num_warmup_steps : %s", num_train_steps,num_warmup_steps)
+    tf.logging.info("train_batch_size : %s,eval_batch_size : %s", FLAGS.train_batch_size,FLAGS.eval_batch_size)
+    tf.logging.info("estimator has been created !!!")
+
+    tf.logging.info("3333" * 10)
     if FLAGS.do_train:
         train_file = os.path.join(FLAGS.output_dir, "train.tf_record")
         file_based_convert_examples_to_features(
@@ -708,7 +743,9 @@ def main(_):
         tf.logging.info("  Num examples = %d", len(train_examples))
         tf.logging.info("  Batch size = %d", FLAGS.train_batch_size)
         tf.logging.info("  Num steps = %d", num_train_steps)
-        
+        tf.logging.info("4444" * 10)
+
+
         """ 14: 相比源码，多传入了一个参数：label_length"""
         train_input_fn = file_based_input_fn_builder(
             input_file=train_file,
@@ -716,7 +753,12 @@ def main(_):
             label_length=label_length,
             is_training=True,
             drop_remainder=True)
+        tf.logging.info("3434" * 10)
+        # early_stopping_hook = ''
+        # logging_hook = tf.train.LoggingTensorHook({"loss": "total_loss"}, every_n_iter=10)
+        # estimator.train(input_fn=train_input_fn, max_steps=num_train_steps,hooks=[logging_hook])
         estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)
+    tf.logging.info("5555" * 10)
 
     if FLAGS.do_eval:
         eval_examples = processor.get_test_examples(FLAGS.data_dir)
@@ -803,7 +845,6 @@ def main(_):
         result = estimator.predict(input_fn=predict_input_fn)
 
         """=========================EXPORT MODEL========================"""
-
         def serving_input_receiver_fn():
             """An input receiver that expects a serialized tf.Example."""
             reciever_tensors = {"input_ids": tf.placeholder(dtype=tf.int64,shape=[1, FLAGS.max_seq_length])}

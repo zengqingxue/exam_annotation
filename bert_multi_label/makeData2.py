@@ -15,6 +15,15 @@ import requests
 import pymysql
 import time
 import re
+import os
+import time
+import random
+import sys
+from multiprocessing import Pool
+from multiprocessing import process
+import pymysql.cursors
+from dbutils.pooled_db import PooledDB
+import argparse
 
 # 中青文章库mysql的配置（仅内网地址，服务器上可访问） wx_article_detail
 zqkd_article_content={
@@ -40,16 +49,18 @@ zq_wx_feed = {   # 外网
     'charset': 'utf8mb4'
 }
 
-zqkd_article_db = pymysql.connect(**zq_wx_feed)
-# zqkd_content_db = pymysql.connect(**zqkd_article_content)
+# zqkd_article_db = pymysql.connect(**zq_wx_feed)
 
-
+# pool = PooledDB(pymysql, 12, **sql_db["pro_env"]["recommend_db"], setsession=['SET AUTOCOMMIT = 1'])
+# pool = PooledDB(pymysql, 12, **zq_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
+# recommend_db = pool.connection()
 
 def get_predictions(itemId,sentences):
     # url = 'http://47.94.110.131:9012/polls/category'  # django api路径
     # url = 'http://172.17.2.223:9012/polls/category'  # django 集群内网路径
     # url = 'http://127.0.0.1:9012/polls/category'  # django 集群内网路径
-    url = 'http://47.94.110.131:9012/polls/category'  # django 集群外网路径
+    # url = 'http://47.94.110.131:9012/polls/category'  # django 集群外网路径
+    url = 'http://172.17.2.202:9012/polls/category'  # django 集群内网网路径
 
     parms = {}
     parms["itemId"] = str(itemId)
@@ -105,7 +116,39 @@ def query_mysql(db, sql):
             pass
     return rows
 
-def main():
+
+import math
+def query_batch(recommend_db):
+    """分页查询msyqL"""
+    # db = pymysql.connect(**zq_wx_feed)
+    with recommend_db.cursor(pymysql.cursors.DictCursor) as cursor:
+        # count_sql = "SELECT count(1) as count FROM wx_feed"
+        # query_num = cursor.execute(count_sql)
+        # num = 0
+        # if query_num :
+        #     num = cursor.fetchall()[0]['count']
+        # print("总共识别条数为： ", num)
+        num = 3000000
+        batch_size = 30000  # 分钟集增量更新用
+        # id_title_dict_list = []
+        for i in range(0, math.ceil(num / batch_size)):
+        # for i in range(0,2): # 测试时用
+            step = i * batch_size
+            query_sql = "SELECT id,title FROM wx_feed order by crawl_time desc limit %s,%s" % (step, batch_size)
+            row_num = cursor.execute(query_sql)
+            if row_num :
+                id_title = cursor.fetchall()
+                # id_title_dict_list.extend(id_title)
+                id_title_df = pd.DataFrame(id_title)
+                id_title_df.to_csv("./id_title_{}.csv".format(i),sep="\t",header=None,index=None)
+                print(i)
+
+def query_content():
+    id_title_df = pd.read_csv("../data/news/traindata/id_title_2.csv", sep="\t", skiprows=0, header="infer"
+                              , names=["id", "title"])
+    id_list = id_title_df['id'].values.tolist()
+
+def main1():
     # sql_title = "SELECT id,tag_id,title,abstract from wx_feed where id in (42870841)"
     # sql_title = "SELECT id,tag_id,title,abstract from wx_feed where crawl_time>UNIX_TIMESTAMP(DATE_SUB(now(),INTERVAL 1 hour)) limit 100"
  #    sql_title = """
@@ -116,16 +159,9 @@ def main():
  #    id_title_df = pd.DataFrame(results_title)
  #    id_title_df.to_csv("./news_data.csv",sep="\t",index=None)
  #
-    id_title_df = pd.read_csv("../data/news/multi_cls/news_data.csv", sep="\t", skiprows=1, header="infer"
+    id_title_df = pd.read_csv("../data/news/traindata/id_title_2.csv", sep="\t", skiprows=0, header="infer"
                               , names=["id","title"])
     print(id_title_df.head())
-
-    # sql_content = "select id,content from wx_article_detail where id in ({})".format(",".join([str(i['id']) for i in results_title]))
-    # results_content = query_mysql(zqkd_content_db,sql_content)
-    #
-    # id_content_df = pd.DataFrame(results_content)
-    # id_content_df['content'] = id_content_df['content'].apply(lambda x:remove_punctuation(contentParser(x)))
-    # ttile_content_df = pd.merge(id_title_df,id_content_df)
 
     # ttile_content_df = title_content_df[["id","title","content","tag_id"]]
     title_content_df = id_title_df[["id","title"]]
@@ -145,13 +181,82 @@ def main():
         print("{}-----".format(count))
 
     df = pd.read_table("./news_data_cat.txt",sep="\t",header=None,names=["id","cate","title"])
-    # print(df)
     df.to_csv("./news_data_cat.csv",sep="\t",index=None,header=["id","cate","title"])
 
-    # print("firstCate_list: ",firstCate_list)
+def worker(num,file,zqkd_content_db):
+    print("开始file: ",file)
+    id_title_df = pd.read_csv(file,sep="\t",header=None,names=["id","title"])
+    id_list = id_title_df['id'].values.tolist()
+    print("id_list: ",len(id_list))
+    print("id_list[:10]: ",id_list[:10])
+    sql_content = "select id,content from wx_article_detail where id in ({})".format(
+        ",".join([str(i) for i in id_list]))
+    results_content = query_mysql(zqkd_content_db, sql_content)
+    id_content_df = pd.DataFrame(results_content)
+    id_content_df['content'] = id_content_df['content'].apply(lambda x: remove_punctuation(contentParser(x)))
+    ttile_content_df = pd.merge(id_title_df, id_content_df)
+    ttile_content_df = ttile_content_df[["id","title","content"]]
+    fp = open("./news_data_cat_{}.txt".format(num), "a")
+    count = 0
+    for row in ttile_content_df.itertuples():
+        itemId = row[1]
+        sentence = row[2]  +"__"+ row[3]
+        cate = get_predictions(itemId, sentence)
+        row = str(itemId) + "\t" + cate + "\t" + sentence + "\n"
+        fp.write(row)
+        count += 1
+        print("{} {} -----".format(os.getpid(),count))
+
+
+def parse_arg():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mc1', dest='mc1',
+                        type=str,
+                        help='please input model category \n e.g. : python3 Vearch.py --mc2 0')
+    parser.add_argument('--mc2', dest='mc2',
+                        type=str,
+                        help='please input model category \n e.g. : python3 Vearch.py --mc2 10')
+    args = parser.parse_args()
+    return vars(args)
+
+
+def main():
+    file_list = os.listdir("./")
+    file_list = [file_name for file_name in file_list if file_name.find("id_title") != -1]
+    argparams = parse_arg()
+    mc1 = int(argparams["mc1"])
+    mc2 = int(argparams["mc2"])
+    file_list = sorted(file_list)[mc1:mc2]
+    print("file_list的长度 ", file_list)
+    pool = PooledDB(pymysql, 12, **zqkd_article_content, setsession=['SET AUTOCOMMIT = 1'])
+    # zqkd_content_db = pymysql.connect(**zqkd_article_content)
+    zqkd_content_db = pool.connection()
+    for num, file in enumerate(file_list):
+        worker(num,file,zqkd_content_db)
 
 
 if __name__ == '__main__':
-    st1 = time.time()
-    main()
-    print("耗时： {} ms".format((time.time() - st1)*1000))
+    # st1 = time.time()
+    # main()
+    # # query_batch(recommend_db)
+    # print("耗时： {} ms".format((time.time() - st1)*1000))
+    i = 0
+    while True:
+        print("nohup python makeData.py --mc1={}".format(str(i)),"--mc2={}"
+              .format(str(i+10)),">> nohup_{}_1.out 2>&1  &".format(str(i+10)))
+        i += 10
+        if i >= 100:
+            break
+
+    """
+    (recommend) [root@iZ2ze260sesa08m8bnslzbZ zengqingxue1]# ps axuw | grep makeData.py
+root      5294  0.0  0.0 112832  1008 pts/1    S+   20:31   0:00 grep --color=auto makeData.py
+root     11743 12.9  0.4 1276004 745624 pts/1  Sl   20:16   1:58 python makeData.py --mc1=0 --mc2=10
+root     44875  7.2  0.2 972820 442260 pts/1   Sl   20:26   0:21 python makeData.py --mc1=10 --mc2=20
+root     44879  6.7  0.1 724432 194128 pts/1   Sl   20:26   0:19 python makeData.py --mc1=50 --mc2=60
+root     44880  7.1  0.1 796408 267868 pts/1   Sl   20:26   0:20 python makeData.py --mc1=60 --mc2=70
+root     44883  7.2  0.2 896128 365512 pts/1   Sl   20:26   0:21 python makeData.py --mc1=70 --mc2=80
+root     44884  7.1  0.1 830560 300164 pts/1   Sl   20:26   0:20 python makeData.py --mc1=80 --mc2=90
+root     44888  7.2  0.2 864760 334236 pts/1   Sl   20:26   0:21 python makeData.py --mc1=90 --mc2=100
+    """
+

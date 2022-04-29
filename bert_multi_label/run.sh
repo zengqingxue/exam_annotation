@@ -11,7 +11,7 @@ python run_classifier.py \
   --init_checkpoint pretrained_model/chinese_L-12_H-768_A-12/bert_model.ckpt \
   --max_seq_length 400 \
   --train_batch_size 8 \
-  --learning_rate 2e-5 \
+  --learning_rate 3e-5 \
   --num_train_epochs 3.0 \
   --output_dir ../data/bert_multi_label_results/epochs3/
 
