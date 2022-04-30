@@ -859,7 +859,8 @@ def main(_):
             return tf.estimator.export.ServingInputReceiver(features, reciever_tensors)
 
         estimator._export_to_tpu = False
-        estimator.export_savedmodel(FLAGS.export_model_dir, serving_input_receiver_fn)
+        # estimator.export_savedmodel(FLAGS.export_model_dir, serving_input_receiver_fn)
+        estimator.export_saved_model(FLAGS.export_model_dir, serving_input_receiver_fn)
         """=========================EXPORT MODEL========================"""
 
         tf.logging.info("###### 即将开始生生成predicted_label.txt #####")
