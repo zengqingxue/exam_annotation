@@ -552,8 +552,6 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
         (total_loss, per_example_loss,logits, probabilities) = create_model(
             bert_config, is_training, input_ids, input_mask, segment_ids, label_ids,
             num_labels, use_one_hot_embeddings)
-        tf.logging.info("num_train_steps: %s, logits: %s, total_loss: %s",num_train_steps,logits,total_loss)
-
         # endregion
 
         # region 模型参数通过预训练模型进行初始化，fine-tuning
@@ -590,9 +588,6 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
             train_op = optimization.create_optimizer(
                 total_loss, learning_rate, num_train_steps, num_warmup_steps, use_tpu)
             logging_hook = tf.train.LoggingTensorHook({"global_step": tf.train.get_global_step(),"loss": total_loss},every_n_iter=30)
-
-            tf.logging.info("total_loss: %s, learning_rate:%s, num_train_steps: %s,use_tpu: %s",total_loss, learning_rate,num_train_steps,use_tpu )
-            tf.logging.info("全局步: %s",tf.train.get_global_step())
 
             output_spec = tf.contrib.tpu.TPUEstimatorSpec(
             # output_spec = tf.estimator.EstimatorSpec(
