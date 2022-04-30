@@ -799,7 +799,9 @@ def main(_):
             is_training=False,
             drop_remainder=eval_drop_remainder)
 
+        tf.logging.info("#######即将开始estimator.evaluate######")
         result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps)
+        tf.logging.info("estimator.evaluate完成： ",result)
 
         output_eval_file = os.path.join(FLAGS.output_dir, "eval_results.txt")
         
@@ -860,6 +862,7 @@ def main(_):
         estimator.export_savedmodel(FLAGS.export_model_dir, serving_input_receiver_fn)
         """=========================EXPORT MODEL========================"""
 
+        tf.logging.info("###### 即将开始生生成predicted_label.txt #####")
         output_predict_file = os.path.join(FLAGS.output_dir, "predicted_label.txt")
         with tf.gfile.GFile(output_predict_file, "w") as writer:
             num_written_lines = 0

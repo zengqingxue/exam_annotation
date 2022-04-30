@@ -13,6 +13,7 @@ python run_classifier.py \
   --train_batch_size 32 \
   --learning_rate 4e-5 \
   --num_train_epochs 3.0 \
+  --use_tpu False \
   --output_dir ../data/bert_multi_label_results/epochs3/
 
 # test bert
