@@ -15,10 +15,10 @@ class Config(object):
         self.output_dir = os.path.join(root,"data","bert_multi_label_results")
         self.vocab_file = os.path.join("pretrained_model","chinese_L-12_H-768_A-12","vocab.txt")
         
-        self.max_len = 150
-        self.output_dim = 95
-        self.learning_rate = 2e-5
-        self.num_epochs = 3
+        # self.max_len = 512
+        # self.output_dim = 95
+        # self.learning_rate = 2e-5
+        # self.num_epochs = 3
 
 if __name__ == '__main__':
     print("root")
