@@ -589,7 +589,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
             #     loss=total_loss, global_step=tf.train.get_global_step())
             train_op = optimization.create_optimizer(
                 total_loss, learning_rate, num_train_steps, num_warmup_steps, use_tpu)
-            logging_hook = tf.train.LoggingTensorHook({"global_step": tf.train.get_global_step(),"loss": total_loss},every_n_iter=10)
+            logging_hook = tf.train.LoggingTensorHook({"global_step": tf.train.get_global_step(),"loss": total_loss},every_n_iter=30)
 
             tf.logging.info("total_loss: %s, learning_rate:%s, num_train_steps: %s,use_tpu: %s",total_loss, learning_rate,num_train_steps,use_tpu )
             tf.logging.info("全局步: %s",tf.train.get_global_step())
