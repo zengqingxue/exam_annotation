@@ -26,6 +26,7 @@ with open(predict_file, encoding='utf8') as f:
         
 y_true = mlb.transform(y_true)
 y_pred = mlb.transform(y_pred)
+print("y_true y_pred 的形状：{}  {}".format(len(y_true),len(y_pred)) )
 
 accuracy = accuracy_score(y_true, y_pred)
 f1_macro = f1_score(y_true, y_pred,average='macro')
