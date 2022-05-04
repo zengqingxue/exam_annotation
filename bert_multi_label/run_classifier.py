@@ -687,12 +687,12 @@ def main(_):
             iterations_per_loop=FLAGS.iterations_per_loop,
             num_shards=FLAGS.num_tpu_cores,
             per_host_input_for_training=is_per_host),
-        # 设置 资源自动增长
-        session_config = tf.ConfigProto(
-            allow_soft_placement=True, log_device_placement=True),
+        # # 设置 资源自动增长
+        # session_config = tf.ConfigProto(
+        #     allow_soft_placement=True, log_device_placement=True),
 
     )
-    run_config.session_config.gpu_options.allow_growth = True
+    # run_config.session_config.gpu_options.allow_growth = True
 
     train_examples = None
     num_train_steps = None
