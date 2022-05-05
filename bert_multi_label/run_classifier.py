@@ -684,7 +684,7 @@ def main(_):
     config = tf.ConfigProto(
         # gpu_options = gpu_options,
         allow_soft_placement=True, log_device_placement=True)
-    config.gpu_options.gpu_options.allow_growth = True
+    config.gpu_options.allow_growth = True
 
     run_config = tf.contrib.tpu.RunConfig(
         cluster=tpu_cluster_resolver,
