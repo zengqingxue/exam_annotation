@@ -14,7 +14,7 @@ python run_classifier.py \
   --eval_batch_size 32 \
   --eval_batch_size 32 \
   --predict_batch_size 32 \
-  --learning_rate 4e-5 \
+  --learning_rate 4e-3 \
   --num_train_epochs 3.0 \
   --export_model_dir ../data/bert_multi_label_results/epochs3/ \
   --output_dir ../data/bert_multi_label_results/epochs3/
