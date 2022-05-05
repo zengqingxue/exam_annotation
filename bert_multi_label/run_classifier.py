@@ -19,7 +19,7 @@ from __future__ import division
 from __future__ import print_function
 import sys
 import os
-# os.environ["CUDA_VISIBLE_DEVICES"] = "0" # 指定GPU
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" # 指定GPU
 
 import collections
 import csv
@@ -678,6 +678,14 @@ def main(_):
             FLAGS.tpu_name, zone=FLAGS.tpu_zone, project=FLAGS.gcp_project)
 
     is_per_host = tf.contrib.tpu.InputPipelineConfig.PER_HOST_V2
+
+    # 设置 gpu资源自动增长
+    # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
+    config = tf.ConfigProto(
+        # gpu_options = gpu_options,
+        allow_soft_placement=True, log_device_placement=True)
+    config.gpu_options.gpu_options.allow_growth = True
+
     run_config = tf.contrib.tpu.RunConfig(
         cluster=tpu_cluster_resolver,
         master=FLAGS.master,
@@ -687,12 +695,8 @@ def main(_):
             iterations_per_loop=FLAGS.iterations_per_loop,
             num_shards=FLAGS.num_tpu_cores,
             per_host_input_for_training=is_per_host),
-        # # 设置 资源自动增长
-        # session_config = tf.ConfigProto(
-        #     allow_soft_placement=True, log_device_placement=True),
-
+        session_config=config
     )
-    # run_config.session_config.gpu_options.allow_growth = True
 
     train_examples = None
     num_train_steps = None
@@ -718,6 +722,7 @@ def main(_):
 
 
     # If TPU is not available, this will fall back to normal Estimator on CPU or GPU.
+    # estimator = tf.contrib.estimator(
     estimator = tf.contrib.tpu.TPUEstimator(
         use_tpu=FLAGS.use_tpu,
         model_fn=model_fn,
