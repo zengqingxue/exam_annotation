@@ -15,11 +15,22 @@ def load_dataset():
     
     """ 1: 读取数据 """
     print("\n读取数据 ... \n")
-    # point_df = pd.read_csv(config.point_path, header=None, names=["id","label", "item"])
-    point_df = pd.read_table(config.point_path, sep="\t" ,header=None, names=["id","label", "item"])
-    point_df = point_df[["label", "item"]]
+    # point_df = pd.read_csv(config.point_path, header=None, names=["id","label", "content"])
+    point_df = pd.read_table(config.point_path, sep="\t" ,header=None, names=["id","label", "content"])
+    point_df = point_df[["label", "content"]]
     point_df.dropna(inplace=True)
     print(f"\nThe shape of the dataset : {point_df.shape}\n")
+
+    #  分析conetent的长度分布
+    point_df = point_df.sample(frac=1.0)
+    print(point_df['label'].value_counts())
+
+    point_df['text_len'] = point_df['content'].map(lambda x: len(x))
+    print(point_df['text_len'].describe())
+    import matplotlib.pyplot as plt
+
+    plt.hist(point_df['text_len'], bins=30, rwidth=0.9, density=True, )
+    plt.show()
     
     """ 2: 获取所有类别并保存 """
     print("\n获取所有类别 ... \n")
@@ -77,8 +88,8 @@ def prepare_dataset():
         label_f = open(os.path.join(proc_dir, set_type,"label.txt"), "w",encoding='utf-8')
         
         """ 按字进行切分 """
-        text = '\n'.join(df_data.item)
-        text_tokened = df_data.item.apply(bert_tokenizer.tokenize)
+        text = '\n'.join(df_data.content)
+        text_tokened = df_data.content.apply(bert_tokenizer.tokenize)
         text_tokened = '\n'.join([' '.join(row) for row in text_tokened])
         label = '\n'.join([" ".join(row) for row in df_data.label])
         

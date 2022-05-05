@@ -10,10 +10,10 @@ python run_classifier.py \
   --bert_config_file pretrained_model/chinese_L-12_H-768_A-12/bert_config.json \
   --init_checkpoint pretrained_model/chinese_L-12_H-768_A-12/bert_model.ckpt \
   --max_seq_length 256 \
-  --train_batch_size 6 \
-  --eval_batch_size 6 \
-  --eval_batch_size 6 \
-  --predict_batch_size 6 \
+  --train_batch_size 64 \
+  --eval_batch_size 64 \
+  --eval_batch_size 64 \
+  --predict_batch_size 64 \
   --learning_rate 4e-5 \
   --num_train_epochs 3.0 \
   --export_model_dir ../data/bert_multi_label_results/epochs3/ \
