@@ -10,8 +10,8 @@ python run_classifier.py \
   --bert_config_file pretrained_model/chinese_L-12_H-768_A-12/bert_config.json \
   --init_checkpoint pretrained_model/chinese_L-12_H-768_A-12/bert_model.ckpt \
   --max_seq_length 256 \
-  --train_batch_size 8 \
-  --eval_batch_size 8 \
+  --train_batch_size 6 \
+  --eval_batch_size 6 \
   --eval_batch_size 8 \
   --predict_batch_size 8 \
   --learning_rate 4e-5 \
