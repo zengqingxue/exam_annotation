@@ -680,7 +680,7 @@ def main(_):
     is_per_host = tf.contrib.tpu.InputPipelineConfig.PER_HOST_V2
 
     # 设置 gpu资源自动增长
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.6)
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.4)
     config = tf.ConfigProto(
         gpu_options = gpu_options,
         allow_soft_placement=True, log_device_placement=True)
