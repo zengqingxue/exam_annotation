@@ -18,7 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 import sys
-import os
+import os,time
 os.environ["CUDA_VISIBLE_DEVICES"] = "0" # 指定GPU
 
 import collections
@@ -886,9 +886,13 @@ def main(_):
 
 
 if __name__ == "__main__":
+    st = time.time()
     flags.mark_flag_as_required("data_dir")
     flags.mark_flag_as_required("task_name")
     flags.mark_flag_as_required("vocab_file")
     flags.mark_flag_as_required("bert_config_file")
     flags.mark_flag_as_required("output_dir")
     tf.app.run()
+    end = time.time()
+    cost = end - st
+    tf.logging.info("训练耗时 %s min ",cost/60)
