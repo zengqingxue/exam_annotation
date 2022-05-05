@@ -18,6 +18,8 @@ python run_classifier.py \
   --num_train_epochs 3.0 \
   --export_model_dir ../data/bert_multi_label_results/epochs3/ \
   --output_dir ../data/bert_multi_label_results/epochs3/
+  --use_tpu=false \
+   --master='' \
 
 # test bert
 python run_test.py
