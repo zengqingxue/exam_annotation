@@ -679,11 +679,11 @@ def main(_):
 
     is_per_host = tf.contrib.tpu.InputPipelineConfig.PER_HOST_V2
 
-    # 设置 gpu资源自动增长
-    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.4)
-    config = tf.ConfigProto(
-        gpu_options = gpu_options,
-        allow_soft_placement=True, log_device_placement=True)
+    # # 设置 gpu资源自动增长
+    # gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.4)
+    # config = tf.ConfigProto(
+    #     gpu_options = gpu_options,
+    #     allow_soft_placement=True, log_device_placement=True)
     # config.gpu_options.allow_growth = True
 
     run_config = tf.contrib.tpu.RunConfig(
@@ -695,7 +695,7 @@ def main(_):
             iterations_per_loop=FLAGS.iterations_per_loop,
             num_shards=FLAGS.num_tpu_cores,
             per_host_input_for_training=is_per_host),
-        session_config=config
+        # session_config=config
     )
 
     train_examples = None
