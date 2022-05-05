@@ -19,7 +19,8 @@ from __future__ import division
 from __future__ import print_function
 import sys
 import os,time
-os.environ["CUDA_VISIBLE_DEVICES"] = "0" # 指定GPU
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0" # 指定GPU
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1" # 指定GPU
 
 import collections
 import csv
@@ -886,6 +887,7 @@ def main(_):
 
 
 if __name__ == "__main__":
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
     st = time.time()
     flags.mark_flag_as_required("data_dir")
     flags.mark_flag_as_required("task_name")
