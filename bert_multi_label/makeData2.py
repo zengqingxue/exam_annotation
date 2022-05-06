@@ -315,7 +315,7 @@ if __name__ == '__main__':
     recommend_db = pool.connection()
     pool = PooledDB(pymysql, 12, **zqkd_article_content, setsession=['SET AUTOCOMMIT = 1'])
     zqkd_content_db = pool.connection()
-    tagname = argparams["taganme"]
+    tagname = argparams["tagname"]
     label = argparams["label"]
     query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
 
