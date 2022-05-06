@@ -128,7 +128,8 @@ import math
 
 def query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label):
     with recommend_db.cursor(pymysql.cursors.DictCursor) as cursor:
-        query_sql = """SELECT id,title FROM wx_feed where tagname in (%s)  and `type`=1"""%",".join(["'%s'"] * len(tagname.split(",")))%(tuple(tagname.split(",")))
+        # query_sql = """SELECT id,title FROM wx_feed where tagname in (%s)  and `type`=1"""%",".join(["'%s'"] * len(tagname.split(",")))%(tuple(tagname.split(",")))
+        query_sql = """SELECT id,title FROM wx_feed where tag_id in (%s)  and `type`=1"""%(tagname)
         print("query_sql: ",query_sql)
         row_num = cursor.execute(query_sql)
         if row_num:
@@ -144,7 +145,6 @@ def query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label):
             sql_content = "select id,content from wx_article_detail where id in ({})".format(
                 ",".join([str(i) for i in id_list]))
 
-            # print("sql_content: ",sql_content)
             results_content = query_mysql(zqkd_content_db, sql_content)
             print("results_content: ",results_content[:2])
             id_content_df = pd.DataFrame(results_content)
@@ -324,21 +324,9 @@ if __name__ == '__main__':
     label = argparams["label"]
     query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
 
-    # s ="""
-    # <article><p>种鸽近亲配对的方式下，很多鸽友都说后代的鸽子有的活力比较差。平时看起来很安静，虽然说算不上是死气沉沉，但是确实也是比较没有活力。这个也算是近亲回血的时候，后代鸽子的一个比较常见的现象。那么我们鸽友平时又难免需要让鸽子近亲回血配对，可以怎么来提升信鸽的回血后代的活力呢？</p>
-    # <div class="pgc-img">
-    # <img width="640" height="480" data-width="640" data-height="480" data-tt="http://res.youth.cn/img-detail/8ab264244405f2c60be13bce4045afd1:640:480.jpg"></div>
-    # <p>第一，选择活力比较好的，健康的，没有任何退化的鸽子来近亲配对。<span class="entity-word" data-gid="970214">回血鸽</span>虽然可能出现后代活力较差的现象，但是这个现象也不是一定会出现。如果回血的鸽子各方面条件都比较好的话，后代鸽子也很少会出现活力下降或者是存在什么退化问题的现象。</p>
-    # <div class="pgc-img">
-    # <img width="640" height="676" data-width="640" data-height="676" data-tt="http://res.youth.cn/img-detail/0ae30d053c54ba7c686e44878e75355b:640:676.jpg"></div>
-    # <p>第二，有的时候会让鸽子进行多重近亲配对，这个时候我们鸽友还可以注意一下，如果说鸽子确实是出的后代的活力下降比较多，那么这个时候就不要近亲配对了，可以让鸽子杂交配对之后再来近亲配对，或者是远亲配对之后再来近亲配对，这样一来问题就少一点。</p>
-    # <div class="pgc-img">
-    # <img width="640" height="480" data-width="640" data-height="480" data-tt="http://res.youth.cn/img-detail/737babc2de5411e994b17c145bac5f9e:640:480.jpg"></div>
-    # <p>第三，对于偶尔出现的活力下降的情况，可以针对性进行淘汰。也就是说，如果鸽子有的出现活力下降的情况，有的完全正常，那么不正常的鸽子可以进行淘汰。这个问题在近亲配对的时候完全可以根据情况来选择一些鸽子进行淘汰，毕竟有的时候退化等问题并不是说所有后代都出现，有时候概率还是比较低的一个情况。</p></article>
-    # """
-    # print(remove_html_punc(s))
 
-    # print(",".join(['%s']*3))
+
+
 # df= pd.read_csv("./tmp0/id_title_27.csv",sep="\t",header=None,index_col=None,names=["id,title"])
     # import numpy as np
     # df = pd.DataFrame({"id":[11,22,33,44,555],
