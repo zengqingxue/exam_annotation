@@ -127,7 +127,8 @@ import math
 
 def query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label):
     with recommend_db.cursor(pymysql.cursors.DictCursor) as cursor:
-        query_sql = "SELECT id,title FROM wx_feed where tagname in ({})  and `type`=1".format(tagname)
+        query_sql = """SELECT id,title FROM wx_feed where tagname in ({})  and `type`=1""".format(tagname)
+        print("query_sql: ",query_sql)
         row_num = cursor.execute(query_sql)
         if row_num:
             id_title = cursor.fetchall()
