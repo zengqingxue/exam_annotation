@@ -296,25 +296,29 @@ def query_by_id(zqkd_content_db):
     return content
 
 
+def merge_duplic_sample_label(df):
+    # df =  pd.DataFrame({
+    #      "id":[1,2,3,1,2],
+    #      "title": ["1", "2", "3", "1", "2"],
+    #      'label': ['A',"B","C","C","D"]
+    #  })
+    # print(df)
+    df_label_merge = df.groupby('id')['label'].apply(lambda x: x.str.cat(sep=' ')).reset_index()
+    print("df_label_merge: ",df_label_merge)
+    df_label_merge.to_csv("./finally_samples.csv", sep="\t", header=None, index=None)
+
+
+
 if __name__ == '__main__':
     argparams = parse_arg()
-    pool = PooledDB(pymysql, 12, **zq_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
+    pool = PooledDB(pymysql, 12, **zqkd_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
     recommend_db = pool.connection()
     pool = PooledDB(pymysql, 12, **zqkd_article_content, setsession=['SET AUTOCOMMIT = 1'])
     zqkd_content_db = pool.connection()
     tagname = argparams["taganme"]
     label = argparams["label"]
     query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
-   # df =  pd.DataFrame({
-   #      "id":[1,2,3,1,2],
-   #      "title": ["1", "2", "3", "1", "2"],
-   #      'label': ['A',"B","C","C","D"]
-   #  })
-   # print(df)
-   # # ab = df.groupby(['title','label'])['id'].apply(lambda x:x.str.cat(sep=" ")).reset_index()
-   # ab = df.groupby('id')['label'].apply(lambda x: x.str.cat(sep='|')).reset_index()
-   # print(ab)
-   # ab.to_csv("./aa.csv", sep="\t", header=None, index=None)
+
 
    # df= pd.read_csv("./tmp0/id_title_27.csv",sep="\t",header=None,index_col=None,names=["id,title"])
     # import numpy as np
