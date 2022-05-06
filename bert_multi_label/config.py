@@ -2,10 +2,7 @@
 import numpy as np
 # forked from DengYangyong/exam_annotation  https://github.com/DengYangyong/exam_annotation
 import os,pathlib
-
-
 root = pathlib.Path(os.path.abspath(__file__)).parent.parent
-
 
 class Config(object):
     def __init__(self):

@@ -341,7 +341,11 @@ def merge_duplic_sample_label(df):
 if __name__ == '__main__':
     # inputfile, outputfile = './news_33.csv',"./news_33.csv.0"
     # read_csv_drop_duplicates(inputfile, outputfile)
-    inputfile, outputfile = "/root/zengqingxue/exam_annotation/data/news/multi_cls/new4cate.csv","/root/zengqingxue/exam_annotation/data/news/multi_cls/new4cate.csv.0"
+    args = parse_arg()
+    inputfile = args['tagname']
+    outputfile = args['label']
+    prefix = "/root/zengqingxue/exam_annotation/data/news/multi_cls/"
+    inputfile, outputfile = prefix+inputfile,prefix+outputfile
     read_csv_postcate(inputfile, outputfile)
     # argparams = parse_arg()
     # pool = PooledDB(pymysql, 12, **zqkd_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
