@@ -604,7 +604,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
             """ 13: 修改评估函数，计算多标签的准确率 """
             def metric_fn(per_example_loss,label_ids, probabilities,is_real_example):
                    
-                predict_ids = tf.cast(probabilities > 0.5, tf.int32)
+                predict_ids = tf.cast(probabilities > config.prob_threshold, tf.int32)
                 label_ids = tf.cast(label_ids, tf.int32)
                                                
                 elements_equal = tf.cast(tf.equal(predict_ids, label_ids), tf.int32)
@@ -642,6 +642,7 @@ def main(_):
         "news_label_29": Multi_Label_Processor,
     }
 
+    # region 读取预训练模型中的ber_config、bert_model.ckpt等进行初始化
     tokenization.validate_case_matches_checkpoint(FLAGS.do_lower_case,
                                                   FLAGS.init_checkpoint)
 
@@ -656,7 +657,7 @@ def main(_):
             "Cannot use sequence length %d because the BERT model "
             "was only trained up to sequence length %d" %
             (FLAGS.max_seq_length, bert_config.max_position_embeddings))
-
+    # endregion
     tf.gfile.MakeDirs(FLAGS.output_dir)
 
     task_name = FLAGS.task_name.lower()
@@ -668,7 +669,7 @@ def main(_):
     label_length = len(label_list)
 
     tf.logging.info("label_length为: %s",label_length)
-    tf.logging.info("label_length为: %s",label_list)
+    tf.logging.info("label_list为: %s",label_list)
 
     tokenizer = tokenization.FullTokenizer(
         vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
@@ -703,13 +704,11 @@ def main(_):
     num_train_steps = None
     num_warmup_steps = None
     if FLAGS.do_train:
-        tf.logging.info("00000" * 10)
         train_examples = processor.get_train_examples(FLAGS.data_dir)
         num_train_steps = int(
             len(train_examples) / FLAGS.train_batch_size * FLAGS.num_train_epochs)
         num_warmup_steps = int(num_train_steps * FLAGS.warmup_proportion)
 
-    tf.logging.info("1111"*10)
     model_fn = model_fn_builder(
         bert_config=bert_config,
         num_labels=len(label_list),
@@ -719,7 +718,6 @@ def main(_):
         num_warmup_steps=num_warmup_steps,
         use_tpu=FLAGS.use_tpu,
         use_one_hot_embeddings=FLAGS.use_tpu)
-    tf.logging.info("22222" * 10)
 
 
     # If TPU is not available, this will fall back to normal Estimator on CPU or GPU.
@@ -736,7 +734,6 @@ def main(_):
     tf.logging.info("train_batch_size : %s,eval_batch_size : %s", FLAGS.train_batch_size,FLAGS.eval_batch_size)
     tf.logging.info("estimator has been created !!!")
 
-    tf.logging.info("3333" * 10)
     if FLAGS.do_train:
         train_file = os.path.join(FLAGS.output_dir, "train.tf_record")
         file_based_convert_examples_to_features(
@@ -745,7 +742,6 @@ def main(_):
         tf.logging.info("  Num examples = %d", len(train_examples))
         tf.logging.info("  Batch size = %d", FLAGS.train_batch_size)
         tf.logging.info("  Num steps = %d", num_train_steps)
-        tf.logging.info("4444" * 10)
 
 
         """ 14: 相比源码，多传入了一个参数：label_length"""
@@ -755,12 +751,10 @@ def main(_):
             label_length=label_length,
             is_training=True,
             drop_remainder=True)
-        tf.logging.info("3434" * 10)
         # early_stopping_hook = ''
         # logging_hook = tf.train.LoggingTensorHook({"loss": "total_loss"}, every_n_iter=10)
         # estimator.train(input_fn=train_input_fn, max_steps=num_train_steps,hooks=[logging_hook])
         estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)
-    tf.logging.info("5555" * 10)
 
     if FLAGS.do_eval:
         eval_examples = processor.get_test_examples(FLAGS.data_dir)
@@ -877,7 +871,7 @@ def main(_):
                 """ 17: 相比源码输出概率值，这里改为输出文本标签 """
                 predicted_labels = []
                 for idx,class_prob in enumerate(probabilities):
-                    if class_prob > 0.5:
+                    if class_prob > config.prob_threshold:
                         predicted_labels.append(label_list[idx])
             
                 output_line_predict = " ".join(predicted_labels) + "\n"
