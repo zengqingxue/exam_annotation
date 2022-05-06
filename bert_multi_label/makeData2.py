@@ -81,6 +81,20 @@ def get_predictions(itemId, sentences):
     # print(json.loads(text))
 
 
+def read_csv_postcate(inputfile,outputfile):
+    df = pd.read_csv(inputfile,sep="\t",header=None,index_col=None,names=["id","label","title_content"])
+    count = 0
+    fp = open(outputfile,"a")
+    for row in df.itertuples():
+        itemId = row[1]
+        sentence = row[3]
+        cate = get_predictions(itemId, sentence)
+        row = str(itemId) + "\t" + cate + " " + row[2] + "\t" + sentence + "\n"
+        fp.write(row)
+        count += 1
+        print("{} -----".format(count))
+    fp.close()
+
 def contentParser(content):
     """去掉html符号 包括短路奥德换行符\n"""
     line = ""
@@ -301,6 +315,16 @@ def query_by_id(zqkd_content_db):
     print("results_content: ", content)
     return content
 
+def read_csv_drop_duplicates(inputfile,outputfile):
+    df = pd.read_csv(inputfile,sep="\t",header=None,index_col=None,names=["id","label","title_content"])
+    # df = df.drop_duplicates(subset=['id', 'label'])
+    df1 = df.groupby(['id','title_content'])['label'].apply(lambda x: x.str.cat(sep=' ')).reset_index()
+    print(df1)
+    df1['label2'] = df1.apply(lambda x: " ".join(set(x.label.split(" "))),axis=1)
+    print(df1)
+    df = df1[['id','label2','title_content']]
+    # df = df.drop_duplicates(subset=['id', 'label']).reset_index(drop=True)
+    df.to_csv(outputfile,header=None,index=None,sep="\t")
 
 def merge_duplic_sample_label(df):
     # df =  pd.DataFrame({
@@ -315,19 +339,20 @@ def merge_duplic_sample_label(df):
 
 
 if __name__ == '__main__':
-    argparams = parse_arg()
-    pool = PooledDB(pymysql, 12, **zqkd_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
-    recommend_db = pool.connection()
-    pool = PooledDB(pymysql, 12, **zqkd_article_content, setsession=['SET AUTOCOMMIT = 1'])
-    zqkd_content_db = pool.connection()
-    tagname = argparams["tagname"]
-    label = argparams["label"]
-    query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
+    # inputfile, outputfile = './news_33.csv',"./news_33.csv.0"
+    # read_csv_drop_duplicates(inputfile, outputfile)
+    inputfile, outputfile = "/root/zengqingxue/exam_annotation/data/news/multi_cls/new4cate.csv","/root/zengqingxue/exam_annotation/data/news/multi_cls/new4cate.csv.0"
+    read_csv_postcate(inputfile, outputfile)
+    # argparams = parse_arg()
+    # pool = PooledDB(pymysql, 12, **zqkd_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
+    # recommend_db = pool.connection()
+    # pool = PooledDB(pymysql, 12, **zqkd_article_content, setsession=['SET AUTOCOMMIT = 1'])
+    # zqkd_content_db = pool.connection()
+    # tagname = argparams["tagname"]
+    # label = argparams["label"]
+    # query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
 
-
-
-
-# df= pd.read_csv("./tmp0/id_title_27.csv",sep="\t",header=None,index_col=None,names=["id,title"])
+    # df= pd.read_csv("./tmp0/id_title_27.csv",sep="\t",header=None,index_col=None,names=["id,title"])
     # import numpy as np
     # df = pd.DataFrame({"id":[11,22,33,44,555],
     #               "title": ["222", np.nan,3344.44,None,np.NaN]
