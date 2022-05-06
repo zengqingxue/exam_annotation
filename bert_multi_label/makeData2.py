@@ -127,7 +127,7 @@ import math
 
 def query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label):
     with recommend_db.cursor(pymysql.cursors.DictCursor) as cursor:
-        query_sql = """SELECT id,title FROM wx_feed where tagname in ({})  and `type`=1""".format(tagname)
+        query_sql = """SELECT id,title FROM wx_feed where tagname in (%s)  and `type`=1"""%",".join(["'%s'"] * len(tagname.split(",")))%(tuple(tagname.split(",")))
         print("query_sql: ",query_sql)
         row_num = cursor.execute(query_sql)
         if row_num:
@@ -319,9 +319,8 @@ if __name__ == '__main__':
     tagname = argparams["tagname"]
     label = argparams["label"]
     query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
-
-
-   # df= pd.read_csv("./tmp0/id_title_27.csv",sep="\t",header=None,index_col=None,names=["id,title"])
+    # print(",".join(['%s']*3))
+# df= pd.read_csv("./tmp0/id_title_27.csv",sep="\t",header=None,index_col=None,names=["id,title"])
     # import numpy as np
     # df = pd.DataFrame({"id":[11,22,33,44,555],
     #               "title": ["222", np.nan,3344.44,None,np.NaN]
