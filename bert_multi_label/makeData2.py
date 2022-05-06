@@ -142,8 +142,11 @@ def query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label):
             print("id_list[:10]: ", id_list[:10])
             sql_content = "select id,content from wx_article_detail where id in ({})".format(
                 ",".join([str(i) for i in id_list]))
+
+            print("sql_content: ",sql_content)
             results_content = query_mysql(zqkd_content_db, sql_content)
             id_content_df = pd.DataFrame(results_content)
+            print("id_content_df: ",id_content_df)
             id_content_df['content'] = id_content_df['content'].apply(lambda x: remove_punctuation(contentParser(x)))
             title_content_df = pd.merge(id_title_df, id_content_df)
             title_content_df['title_content'] = title_content_df['title'].str.cat(title_content_df["content"],sep="__")
@@ -307,7 +310,6 @@ def merge_duplic_sample_label(df):
     df_label_merge = df.groupby('id')['label'].apply(lambda x: x.str.cat(sep=' ')).reset_index()
     print("df_label_merge: ",df_label_merge)
     df_label_merge.to_csv("./finally_samples.csv", sep="\t", header=None, index=None)
-
 
 
 if __name__ == '__main__':
