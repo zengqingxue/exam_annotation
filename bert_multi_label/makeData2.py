@@ -53,8 +53,8 @@ zq_wx_feed = {  # 外网
 # zqkd_article_db = pymysql.connect(**zq_wx_feed)
 
 # pool = PooledDB(pymysql, 12, **sql_db["pro_env"]["recommend_db"], setsession=['SET AUTOCOMMIT = 1'])
-pool = PooledDB(pymysql, 12, **zq_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
-recommend_db = pool.connection()
+# pool = PooledDB(pymysql, 12, **zq_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
+# recommend_db = pool.connection()
 
 def get_predictions(itemId, sentences):
     # url = 'http://47.94.110.131:9012/polls/category'  # django api路径
@@ -125,6 +125,31 @@ def query_mysql(db, sql):
 
 import math
 
+def query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label):
+    with recommend_db.cursor(pymysql.cursors.DictCursor) as cursor:
+        query_sql = "SELECT id,title FROM wx_feed where tagname in ({})  and `type`=1".format(tagname)
+        row_num = cursor.execute(query_sql)
+        if row_num:
+            id_title = cursor.fetchall()
+            # id_title_dict_list.extend(id_title)
+            id_title_df = pd.DataFrame(id_title)
+            id_title_df['title'] = id_title_df['title'].apply(lambda x: remove_html_punc(x))
+
+            # 查询content
+            id_list = id_title_df['id'].values.tolist()
+            print("id_list: ", len(id_list))
+            print("id_list[:10]: ", id_list[:10])
+            sql_content = "select id,content from wx_article_detail where id in ({})".format(
+                ",".join([str(i) for i in id_list]))
+            results_content = query_mysql(zqkd_content_db, sql_content)
+            id_content_df = pd.DataFrame(results_content)
+            id_content_df['content'] = id_content_df['content'].apply(lambda x: remove_punctuation(contentParser(x)))
+            title_content_df = pd.merge(id_title_df, id_content_df)
+            title_content_df['title_content'] = title_content_df['title'].str.cat(title_content_df["content"],sep="__")
+            title_content_df['label'] = label
+            title_content_df =  title_content_df[['id','label','title_content']]
+            title_content_df.to_csv("./{}.csv".format(label), sep="\t", header=None, index=None)
+
 
 def query_batch(recommend_db):
     """分页查询msyqL"""
@@ -174,7 +199,7 @@ def main1():
                               , names=["id", "title"])
     print(id_title_df.head())
 
-    # ttile_content_df = title_content_df[["id","title","content","tag_id"]]
+    # title_content_df = title_content_df[["id","title","content","tag_id"]]
     title_content_df = id_title_df[["id", "title"]]
     firstCate_list = []
     fp = open("./news_data_cat.txt", "a")
@@ -206,34 +231,41 @@ def worker(num, file, zqkd_content_db):
     results_content = query_mysql(zqkd_content_db, sql_content)
     id_content_df = pd.DataFrame(results_content)
     id_content_df['content'] = id_content_df['content'].apply(lambda x: remove_punctuation(contentParser(x)))
-    ttile_content_df = pd.merge(id_title_df, id_content_df)
-    ttile_content_df = ttile_content_df[["id", "title", "content"]]
-    fp = open("./news_data_cat_{}.txt".format(num), "a")
-    count = 0
-    for row in ttile_content_df.itertuples():
-        itemId = row[1]
-        sentence = row[2] + "__" + row[3]
-        cate = get_predictions(itemId, sentence)
-        row = str(itemId) + "\t" + cate + "\t" + sentence + "\n"
-        fp.write(row)
-        count += 1
-        print("{} {} -----".format(os.getpid(), count))
+    title_content_df = pd.merge(id_title_df, id_content_df)
+    title_content_df['label']
+    title_content_df = title_content_df[["id", "title", "content"]]
+    # fp = open("./news_data_cat_{}.txt".format(num), "a")
+    # count = 0
+    # for row in title_content_df.itertuples():
+    #     itemId = row[1]
+    #     sentence = row[2] + "__" + row[3]
+    #     cate = get_predictions(itemId, sentence)
+    #     row = str(itemId) + "\t" + cate + "\t" + sentence + "\n"
+    #     fp.write(row)
+    #     count += 1
+    #     print("{} {} -----".format(os.getpid(), count))
 
 
 def parse_arg():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--mc1', dest='mc1',
+    # parser.add_argument('--mc1', dest='mc1',
+    #                     type=str,
+    #                     help='please input model category \n e.g. : python3 Vearch.py --mc2 0')
+    # parser.add_argument('--mc2', dest='mc2',
+    #                     type=str,
+    #                     help='please input model category \n e.g. : python3 Vearch.py --mc2 10')
+    # parser.add_argument('--output_dir', dest='output_dir',
+    #                     type=str,
+    #                     help='please input model category \n e.g. : python3 Vearch.py --mc2 10')
+    # parser.add_argument('--file_num', dest='file_num',
+    #                     type=str,
+    #                     help='please input model category \n e.g. : python3 Vearch.py --file_num 10')
+    parser.add_argument('--tagname', dest='tagname',
                         type=str,
-                        help='please input model category \n e.g. : python3 Vearch.py --mc2 0')
-    parser.add_argument('--mc2', dest='mc2',
+                        help='please input model category \n e.g. : python3 Vearch.py --tagname 10')
+    parser.add_argument('--label', dest='label',
                         type=str,
-                        help='please input model category \n e.g. : python3 Vearch.py --mc2 10')
-    parser.add_argument('--output_dir', dest='output_dir',
-                        type=str,
-                        help='please input model category \n e.g. : python3 Vearch.py --mc2 10')
-    parser.add_argument('--file_num', dest='file_num',
-                        type=str,
-                        help='please input model category \n e.g. : python3 Vearch.py --file_num 10')
+                        help='please input model category \n e.g. : python3 Vearch.py --label 10')
     args = parser.parse_args()
     return vars(args)
 
@@ -265,9 +297,26 @@ def query_by_id(zqkd_content_db):
 
 
 if __name__ == '__main__':
-    a = [1,2,3,4,5]
-    print(a[0:5])
-    # df= pd.read_csv("./tmp0/id_title_27.csv",sep="\t",header=None,index_col=None,names=["id,title"])
+    argparams = parse_arg()
+    pool = PooledDB(pymysql, 12, **zq_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
+    recommend_db = pool.connection()
+    pool = PooledDB(pymysql, 12, **zqkd_article_content, setsession=['SET AUTOCOMMIT = 1'])
+    zqkd_content_db = pool.connection()
+    tagname = argparams["taganme"]
+    label = argparams["label"]
+    query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
+   # df =  pd.DataFrame({
+   #      "id":[1,2,3,1,2],
+   #      "title": ["1", "2", "3", "1", "2"],
+   #      'label': ['A',"B","C","C","D"]
+   #  })
+   # print(df)
+   # # ab = df.groupby(['title','label'])['id'].apply(lambda x:x.str.cat(sep=" ")).reset_index()
+   # ab = df.groupby('id')['label'].apply(lambda x: x.str.cat(sep='|')).reset_index()
+   # print(ab)
+   # ab.to_csv("./aa.csv", sep="\t", header=None, index=None)
+
+   # df= pd.read_csv("./tmp0/id_title_27.csv",sep="\t",header=None,index_col=None,names=["id,title"])
     # import numpy as np
     # df = pd.DataFrame({"id":[11,22,33,44,555],
     #               "title": ["222", np.nan,3344.44,None,np.NaN]
@@ -302,14 +351,14 @@ if __name__ == '__main__':
     #     if i >= 100:
     #         break
 
-    """
-    (recommend) [root@iZ2ze260sesa08m8bnslzbZ zengqingxue1]# ps axuw | grep makeData.py
-root      5294  0.0  0.0 112832  1008 pts/1    S+   20:31   0:00 grep --color=auto makeData.py
-root     11743 12.9  0.4 1276004 745624 pts/1  Sl   20:16   1:58 python makeData.py --mc1=0 --mc2=10
-root     44875  7.2  0.2 972820 442260 pts/1   Sl   20:26   0:21 python makeData.py --mc1=10 --mc2=20
-root     44879  6.7  0.1 724432 194128 pts/1   Sl   20:26   0:19 python makeData.py --mc1=50 --mc2=60
-root     44880  7.1  0.1 796408 267868 pts/1   Sl   20:26   0:20 python makeData.py --mc1=60 --mc2=70
-root     44883  7.2  0.2 896128 365512 pts/1   Sl   20:26   0:21 python makeData.py --mc1=70 --mc2=80
-root     44884  7.1  0.1 830560 300164 pts/1   Sl   20:26   0:20 python makeData.py --mc1=80 --mc2=90
-root     44888  7.2  0.2 864760 334236 pts/1   Sl   20:26   0:21 python makeData.py --mc1=90 --mc2=100
-    """
+    #     """
+    #     (recommend) [root@iZ2ze260sesa08m8bnslzbZ zengqingxue1]# ps axuw | grep makeData.py
+    # root      5294  0.0  0.0 112832  1008 pts/1    S+   20:31   0:00 grep --color=auto makeData.py
+    # root     11743 12.9  0.4 1276004 745624 pts/1  Sl   20:16   1:58 python makeData.py --mc1=0 --mc2=10
+    # root     44875  7.2  0.2 972820 442260 pts/1   Sl   20:26   0:21 python makeData.py --mc1=10 --mc2=20
+    # root     44879  6.7  0.1 724432 194128 pts/1   Sl   20:26   0:19 python makeData.py --mc1=50 --mc2=60
+    # root     44880  7.1  0.1 796408 267868 pts/1   Sl   20:26   0:20 python makeData.py --mc1=60 --mc2=70
+    # root     44883  7.2  0.2 896128 365512 pts/1   Sl   20:26   0:21 python makeData.py --mc1=70 --mc2=80
+    # root     44884  7.1  0.1 830560 300164 pts/1   Sl   20:26   0:20 python makeData.py --mc1=80 --mc2=90
+    # root     44888  7.2  0.2 864760 334236 pts/1   Sl   20:26   0:21 python makeData.py --mc1=90 --mc2=100
+    #     """
