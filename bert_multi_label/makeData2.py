@@ -30,7 +30,8 @@ zqkd_article_content = {
     "host": "sjxl4n6ub99jbdn4aq0b-rw4rm.rwlb.rds.aliyuncs.com",
     "user": "kd_article",
     "password": "KD!$article1223",
-    "database": "zqkd-article"
+    "database": "zqkd-article",
+    "charset":'utf8mb4'
 }
 
 zqkd_wx_feed = {  # 内网
