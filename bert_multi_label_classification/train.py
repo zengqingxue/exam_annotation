@@ -18,8 +18,9 @@ from bert_model import build_bert_model
 from data_helper import load_data
 
 #定义超参数和配置文件
-epochs = 30
-class_nums = 65
+epochs = 3
+class_nums = 30
+# class_nums = 65
 maxlen = 200
 batch_size = 16
 
