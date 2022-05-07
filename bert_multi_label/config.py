@@ -6,7 +6,7 @@ root = pathlib.Path(os.path.abspath(__file__)).parent.parent
 
 class Config(object):
     def __init__(self):
-        self.point_path = os.path.join(root,"data","news/multi_cls/news_33.csv")
+        self.point_path = os.path.join(root,"data","news/multi_cls/news_33.csv.1")
         self.proc_dir = os.path.join(root,"data","bert_multi_label_results","proc")
         self.class_path = os.path.join(root,"data","news/multi_cls","33_class.txt")
         self.output_dir = os.path.join(root,"data","bert_multi_label_results")
