@@ -15,13 +15,15 @@ def load_data(file_path):
         for line in f.readlines():
             line = line.strip().split("\t") # line = ['label1|label2','sample_text']
             label_list.append(line[1].split(" "))
-            sample_list.append(line[1])
+            sample_list.append(line[2])
 
     text_len = [len(text) for text in sample_list]
     df = pd.DataFrame()
     df['len'] = text_len
     print('训练文本长度分度')
     print(df['len'].describe())
+    print("sample_list[:2]: {}",sample_list[:2])
+    print("label_list[:2]: {}",label_list[:2])
 
     return sample_list,label_list
 
