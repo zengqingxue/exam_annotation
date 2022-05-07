@@ -19,6 +19,7 @@ def load_dataset():
     point_df = pd.read_table(config.point_path, sep="\t" ,header=None, names=["id","label", "content"])
     point_df = point_df[["label", "content"]]
     point_df.dropna(inplace=True)
+    print(f"\nthe dataset : {point_df}\n")
     print(f"\nThe shape of the dataset : {point_df.shape}\n")
 
     #  分析conetent的长度分布

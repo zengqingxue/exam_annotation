@@ -477,6 +477,8 @@ def truncate_seq_pair(tokens_a, tokens_b, max_length):
 """ 6: 修改模型，在预训练层外面增加一个dense层，做sigmoid """
 def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
                  labels, num_labels, use_one_hot_embeddings):
+
+    st_start = time.time()
     """Creates a classification model."""
     model = modeling.BertModel(
         config=bert_config,
@@ -490,6 +492,10 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
     # If you want to use the token-level output, use model.get_sequence_output() instead.
     """ 7: 文本分类，适用对序列做池化后的输出；序列标注，适用序列输出 """
     output_layer = model.get_pooled_output()
+
+    output_end = time.time()
+    get_emb_cost = (output_end - st_start) / 60
+    tf.logging.info("获得最后一层的输出向量耗时： %s"%(get_emb_cost))
     
     """ 8: 依次添加weights和bias，构成dense层。"""
     hidden_size = output_layer.shape[-1].value
@@ -519,6 +525,9 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
             tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=label_ids), axis=-1)
         loss = tf.reduce_mean(per_example_loss,name="total_loss")
         # tf.logging("loss为： %s",loss)
+        loss_end = time.time()
+        loss_cost = ( loss_end - output_end ) / 60
+        tf.logging.info("分类损失训练耗时： %s" % (loss_cost))
 
         return (loss, per_example_loss, logits, probs)
 
