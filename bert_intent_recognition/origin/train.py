@@ -72,9 +72,9 @@ if __name__ == '__main__':
         verbose=2,
         mode='min'
         )
-    bast_model_filepath = './checkpoint/best_model.weights'
+    best_model_filepath = './checkpoint/best_model.weights'
     checkpoint = keras.callbacks.ModelCheckpoint(
-        bast_model_filepath,
+        best_model_filepath,
         monitor='val_loss',
         verbose=1,
         save_best_only=True,
@@ -91,7 +91,7 @@ if __name__ == '__main__':
         callbacks=[earlystop,checkpoint]
     )
 
-    model.load_weights(bast_model_filepath)
+    model.load_weights(best_model_filepath)
     test_pred = []
     test_true = []
     for x,y in test_generator:

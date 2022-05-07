@@ -13,9 +13,9 @@ def load_data(file_path):
     label_list = []
     with open(file_path, "r", encoding="utf-8") as f:
         for line in f.readlines():
-            line = line.strip().split() # line = ['label1|label2','sample_text']
-            label_list.append(line[0].split('|'))
-            sample_list.append(line[1])
+            line = line.strip().split("\t") # line = ['label1|label2','sample_text']
+            label_list.append(line[1].split(" "))
+            sample_list.append(line[2])
 
     text_len = [len(text) for text in sample_list]
     df = pd.DataFrame()

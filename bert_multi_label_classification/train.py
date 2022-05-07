@@ -1,7 +1,7 @@
 #! -*- coding: utf-8 -*-
 import json
 import pickle
-import pandas as pd 
+import pandas as pd
 import numpy as np 
 import random
 from tqdm import tqdm
@@ -12,6 +12,7 @@ from bert4keras.tokenizers import Tokenizer
 from bert4keras.snippets import sequence_padding, DataGenerator
 from sklearn.metrics import classification_report
 from bert4keras.optimizers import Adam
+import os,sys
 
 from bert_model import build_bert_model
 from data_helper import load_data
@@ -22,11 +23,19 @@ class_nums = 65
 maxlen = 200
 batch_size = 16
 
-config_path='E:/bert_weight_files/roberta/bert_config_rbt3.json'
-checkpoint_path='E:/bert_weight_files/roberta/bert_model.ckpt'
-dict_path = 'E:/bert_weight_files/roberta/vocab.txt'
+cur_dir = os.getcwd()
+parent_dir = os.path.abspath(os.path.join(cur_dir,os.path.pardir))
+config_path= os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/chinese_L-12_H-768_A-12/bert_config.json"))
+checkpoint_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/chinese_L-12_H-768_A-12/bert_model.ckpt"))
+dict_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/chinese_L-12_H-768_A-12/vocab.txt"))
 
-bast_model_filepath = './checkpoint/best_model.weights'
+
+
+# config_path='E:/bert_weight_files/roberta/bert_config_rbt3.json'
+# checkpoint_path='E:/bert_weight_files/roberta/bert_model.ckpt'
+# dict_path = 'E:/bert_weight_files/roberta/vocab.txt'
+
+best_model_filepath = './checkpoint/best_model.weights'
 
 tokenizer = Tokenizer(dict_path)
 
@@ -69,13 +78,13 @@ class Evaluator(keras.callbacks.Callback):
         self.stopped_epoch = 0
 
     def on_epoch_end(self,epoch,logs=None):
-        # model.load_weights(bast_model_filepath)
+        # model.load_weights(best_model_filepath)
         acc = cal_acc(test_x,test_y) # 计算多标签分类准确率
         if acc > self.best_acc:
-            print('Accuracy increased from {} to {} ,save model to {}'.format(self.best_acc,acc,bast_model_filepath))
-            self.best_acc = acc 
+            print('Accuracy increased from {} to {} ,save model to {}'.format(self.best_acc,acc,best_model_filepath))
+            self.best_acc = acc
             self.wait = 0
-            model.save_weights(bast_model_filepath)
+            model.save_weights(best_model_filepath)
         else:
             self.wait += 1
             if self.wait >= self.patience:
@@ -100,7 +109,7 @@ if __name__ == '__main__':
     random.shuffle(shuffle_index)
     train_x = [train_x[i] for i in shuffle_index]
     train_y = [train_y[i] for i in shuffle_index]
-    
+
     mlb = MultiLabelBinarizer()
     mlb.fit(train_y)
     print("标签数量：",len(mlb.classes_))
@@ -126,10 +135,24 @@ if __name__ == '__main__':
         train_generator.forfit(),
         steps_per_epoch=len(train_generator),
         epochs=epochs,
-        # validation_data=test_generator.forfit(), 
+        # validation_data=test_generator.forfit(),
         # validation_steps=len(test_generator),
-        shuffle=True, 
+        shuffle=True,
         callbacks=[evalutor]
     )
+
+    model.load_weights(best_model_filepath)
+    test_pred = []
+    test_true = []
+    for x, y in test_generator:
+        p = model.predict(x).argmax(axis=1)
+        test_pred.extend(p)
+
+    test_true = test_data[:, 1].tolist()
+    print(set(test_true))
+    print(set(test_pred))
+
+    target_names = [line.strip() for line in open('label', 'r', encoding='utf8')]
+    print(classification_report(test_true, test_pred, target_names=target_names))
 else:
-    model.load_weights(bast_model_filepath)
+    model.load_weights(best_model_filepath)

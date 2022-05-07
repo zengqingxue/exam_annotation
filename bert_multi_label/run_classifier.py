@@ -541,6 +541,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
     def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
         """The `model_fn` for TPUEstimator."""
 
+        model_fn_st = time.time()
         # region 定义的estimator的模型架构  定义inference 图
         tf.logging.info("*** Features ***")
         for name in sorted(features.keys()):
@@ -589,16 +590,18 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
             tf.logging.info("  name = %s, shape = %s%s", var.name, var.shape,
                             init_string)
 
+
         # region 执行相应的 TRAIN  EVAL PREDICT
         output_spec = None
         if mode == tf.estimator.ModeKeys.TRAIN:
             # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
             # train_op = optimizer.minimize(
             #     loss=total_loss, global_step=tf.train.get_global_step())
+            model_fn_st1 = time.time()
+            tf.logging.info("model_fn 训练一次前的准备耗时： %s s" % (model_fn_st1 - model_fn_st))
             train_op = optimization.create_optimizer(
                 total_loss, learning_rate, num_train_steps, num_warmup_steps, use_tpu)
             logging_hook = tf.train.LoggingTensorHook({"global_step": tf.train.get_global_step(),"loss": total_loss},every_n_iter=30)
-
             output_spec = tf.contrib.tpu.TPUEstimatorSpec(
             # output_spec = tf.estimator.EstimatorSpec(
                 mode=mode,
@@ -608,6 +611,8 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
                 scaffold_fn=scaffold_fn
             )
             tf.logging.info("output_spec: %s",output_spec)
+            model_fn_st1_train = time.time()
+            tf.logging.info("model_fn 训练一次耗时： %s s" % (model_fn_st1_train - model_fn_st1))
 
         elif mode == tf.estimator.ModeKeys.EVAL:
             """ 13: 修改评估函数，计算多标签的准确率 """
@@ -697,6 +702,9 @@ def main(_):
     #     allow_soft_placement=True, log_device_placement=True)
     # config.gpu_options.allow_growth = True
 
+
+    # estimator 分部式训练
+    mirrored_strategy = tf.distribute.MirroredStrategy()
     run_config = tf.contrib.tpu.RunConfig(
         cluster=tpu_cluster_resolver,
         master=FLAGS.master,
@@ -706,6 +714,8 @@ def main(_):
             iterations_per_loop=FLAGS.iterations_per_loop,
             num_shards=FLAGS.num_tpu_cores,
             per_host_input_for_training=is_per_host),
+        # 分部式训练
+        train_distribute=mirrored_strategy, eval_distribute=mirrored_strategy
         # session_config=config
     )
 

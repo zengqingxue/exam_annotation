@@ -2,6 +2,13 @@
 from bert4keras.backend import keras,set_gelu
 from bert4keras.models import build_transformer_model
 from bert4keras.optimizers import Adam
+import os
+cur_dir = os.getcwd()
+parent_dir = os.path.abspath(os.path.join(cur_dir,os.path.pardir))
+config_path= os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/chinese_L-12_H-768_A-12/bert_config.json"))
+checkpoint_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/chinese_L-12_H-768_A-12/bert_model.ckpt"))
+dict_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/chinese_L-12_H-768_A-12/vocab.txt"))
+
 
 set_gelu('tanh')#relu
 
@@ -89,7 +96,9 @@ def build_bert_model(config_path,checkpoint_path,class_nums):
     return model
 
 if __name__ == '__main__':
-    config_path='E:/bert_weight_files/bert_wwm/bert_config.json'
-    checkpoint_path='E:/bert_weight_files/bert_wwm/bert_model.ckpt'
+    # config_path='E:/bert_weight_files/bert_wwm/bert_config.json'
+    # checkpoint_path='E:/bert_weight_files/bert_wwm/bert_model.ckpt'
+    config_path = config_path
+    checkpoint_path = checkpoint_path
     class_nums=13
     build_bert_model(config_path, checkpoint_path, class_nums)
