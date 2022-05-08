@@ -18,27 +18,34 @@ from data_helper import load_data
 from loguru import logger
 logger.add('./logs/my.log', format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> - {module} - {function} - {level} - line:{line} - {message}", level="INFO",rotation='00:00',retention="3 day")
 import argparse
-
-def parse_arg():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs",dest=epochs,type=int,default=3,help="the number of train epochs")
-    parser.add_argument("--class_nums",dest=class_nums,type=int,default=30,help="the number of samples class_nums")
-    parser.add_argument("--maxlen",dest=maxlen,type=int,default=200,help="the maxlen of text ")
-    parser.add_argument("--batch_size",dest=batch_size,type=int,default=16,help="the batch_size of train ")
-    parser.add_argument("--model_path",dest=model_path,type=str,default="",help="the model version of train samples number")
-    parser.add_argument("--data_version",dest=data_version,type=str,default="",help="the model version of train samples number")
-    args = parser.parse_args()
-    return vars(args)
+#
+# def parse_arg():
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("--epochs",dest=epochs,type=int,default=3,help="the number of train epochs")
+#     parser.add_argument("--class_nums",dest=class_nums,type=int,default=30,help="the number of samples class_nums")
+#     parser.add_argument("--maxlen",dest=maxlen,type=int,default=200,help="the maxlen of text ")
+#     parser.add_argument("--batch_size",dest=batch_size,type=int,default=16,help="the batch_size of train ")
+#     parser.add_argument("--model_path",dest=model_path,type=str,default="",help="the model version of train samples number")
+#     parser.add_argument("--data_version",dest=data_version,type=str,default="",help="the model version of train samples number")
+#     args = parser.parse_args()
+#     return vars(args)
 
 
 #定义超参数和配置文件
-args = parse_arg()
-epochs = args['epochs']
-class_nums = args['class_nums']
-maxlen = args['maxlen']
-batch_size = args['batch_size']
-model_path = args['model_path']
-data_version = args['data_version']
+# args = parse_arg()
+# epochs = args['epochs']
+# class_nums = args['class_nums']
+# maxlen = args['maxlen']
+# batch_size = args['batch_size']
+# model_path = args['model_path']
+# data_version = args['data_version']
+
+epochs = 3
+class_nums = 30
+maxlen = 512
+batch_size = 16
+model_path = ""
+data_version = ".all"
 
 if maxlen > 512:
     assert 0 is -1
@@ -55,7 +62,7 @@ dict_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained
 # dict_path = 'E:/bert_weight_files/roberta/vocab.txt'
 
 best_model_filepath = './checkpoint/best_model.weights'
-best_model_filepath = best_model_filepath + model_path
+# best_model_filepath = best_model_filepath + model_path
 
 tokenizer = Tokenizer(dict_path)
 
