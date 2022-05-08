@@ -16,10 +16,10 @@ def analyze_textlen_labels(df):
     logger.info('{}文本长度分度分布{}', "====" * 10, "====" * 10)
     df['text_len'] = df['content'].map(lambda x: len(x))
     logger.info(df['text_len'].describe(percentiles=[0.25, 0.5, 0.75, 0.8, 0.9, 0.95]))
-    import matplotlib.pyplot as plt
-    plt.hist(df['text_len'], bins=30, rwidth=0.9, density=True, )
+    # import matplotlib.pyplot as plt
+    # plt.hist(df['text_len'], bins=30, rwidth=0.9, density=True, )
     # plt.hist(df['text_len'], bins=30, rwidth=0.9,)
-    plt.show()
+    # plt.show()
 
 
 def split_train_test(df,test_size=0.2,is_names=False,names=None,is_valid=False):
@@ -37,8 +37,8 @@ def split_train_test(df,test_size=0.2,is_names=False,names=None,is_valid=False):
 
 def split_train_test(file_path):
     """切分训练集和测试集，并进行数据分析"""
-    point_df = pd.read_table(file_path, sep=" ", header=None, names=["label", "content"])
-    # point_df = pd.read_table(file_path, sep="\t", header=None, names=["id", "label", "content"])
+    # point_df = pd.read_table(file_path, sep=" ", header=None, names=["label", "content"])
+    point_df = pd.read_table(file_path, sep="\t", header=None, names=["id", "label", "content"])
     point_df = point_df[["label", "content"]]
     point_df.dropna(inplace=True)
     logger.info("\nthe dataset : {}\n", point_df)
@@ -88,7 +88,6 @@ def load_data(file_path):
 def parse_arg():
     parse = argparse.ArgumentParser()
     parse.add_argument("--oprate",dest="oprate",type=str,help="please input oprate type \n e.g: python data_helper.py --oprate split")
-
     args = parse.parse_args()
     return vars(args)
 
