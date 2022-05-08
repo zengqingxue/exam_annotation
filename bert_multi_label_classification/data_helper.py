@@ -9,7 +9,7 @@ logger.add('./logs/my.log', format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> - 
 from sklearn.model_selection import train_test_split
 
 def analyze_textlen_labels(df):
-    logger.info('{}文本标签数据分布{}',"===="*10,"===="*10)
+    logger.info('{}文本标签数据分布{}',"===="*4,"===="*4)
     df = df.sample(frac=1.0)
     logger.info(df['label'].value_counts())
 

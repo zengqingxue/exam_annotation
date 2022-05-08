@@ -17,14 +17,32 @@ from bert_model import build_bert_model
 from data_helper import load_data
 from loguru import logger
 logger.add('./logs/my.log', format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> - {module} - {function} - {level} - line:{line} - {message}", level="INFO",rotation='00:00',retention="3 day")
+import argparse
+
+def parse_arg():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--epochs",dest=epochs,type=int,default=3,help="the number of train epochs")
+    parser.add_argument("--class_nums",dest=class_nums,type=int,default=30,help="the number of samples class_nums")
+    parser.add_argument("--maxlen",dest=maxlen,type=int,default=200,help="the maxlen of text ")
+    parser.add_argument("--batch_size",dest=batch_size,type=int,default=16,help="the batch_size of train ")
+    parser.add_argument("--model_path",dest=model_path,type=str,default="",help="the model version of train samples number")
+    parser.add_argument("--data_version",dest=data_version,type=str,default="",help="the model version of train samples number")
+    args = parser.parse_args()
+    return vars(args)
 
 
 #定义超参数和配置文件
-epochs = 3
-class_nums = 30
-# class_nums = 65
-maxlen = 200
-batch_size = 16
+args = parse_arg()
+epochs = args['epochs']
+class_nums = args['class_nums']
+maxlen = args['maxlen']
+batch_size = args['batch_size']
+model_path = args['model_path']
+data_version = args['data_version']
+
+if maxlen > 512:
+    assert 0 is -1
+    logger.info("train exits!!! maxlen of the input is larger than 512 which is the maxlen of pretrain bert")
 
 cur_dir = os.getcwd()
 parent_dir = os.path.abspath(os.path.join(cur_dir,os.path.pardir))
@@ -32,13 +50,12 @@ config_path= os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretraine
 checkpoint_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/chinese_L-12_H-768_A-12/bert_model.ckpt"))
 dict_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/chinese_L-12_H-768_A-12/vocab.txt"))
 
-
-
 # config_path='E:/bert_weight_files/roberta/bert_config_rbt3.json'
 # checkpoint_path='E:/bert_weight_files/roberta/bert_model.ckpt'
 # dict_path = 'E:/bert_weight_files/roberta/vocab.txt'
 
 best_model_filepath = './checkpoint/best_model.weights'
+best_model_filepath = best_model_filepath + model_path
 
 tokenizer = Tokenizer(dict_path)
 
@@ -107,8 +124,8 @@ if __name__ == '__main__':
     s1 = time.time()
 
     # 加载数据集
-    train_x,train_y = load_data('./data/multi-classification-train.txt')
-    test_x,test_y = load_data('./data/multi-classification-test.txt')
+    train_x,train_y = load_data('./data/multi-classification-train.txt' + data_version)
+    test_x,test_y = load_data('./data/multi-classification-test.txt' + data_version)
 
     shuffle_index =[i for i in range(len(train_x))]
     random.shuffle(shuffle_index)
