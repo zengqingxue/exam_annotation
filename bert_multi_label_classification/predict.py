@@ -9,7 +9,6 @@ print(mlb.classes_.tolist())
 threshold = 0.5
 
 
-
 def predict_single(test_text):
 	token_ids, segment_ids = tokenizer.encode(test_text, maxlen=maxlen)
 	pred = model.predict([[token_ids], [segment_ids]])
@@ -29,7 +28,7 @@ def evaluate():
         pred_y, pred_label = predict_single(text)
         pred_y_list.append(pred_y)
     # F1值
-    print(classification_report(true_y_list, pred_y_list, digits=4,target_names=mlb.classes_.tolist()))#
+    print("F1值为：\n",classification_report(true_y_list, pred_y_list, digits=4,target_names=mlb.classes_.tolist()))#
 
 
 if __name__ == '__main__':
@@ -38,4 +37,4 @@ if __name__ == '__main__':
 	one_hot,label = predict_single(test_text)
 	print("测试样本预测标签：",label)
 
-	# evaluate()
+	evaluate()

@@ -29,7 +29,6 @@ def load_dataset():
     point_df['text_len'] = point_df['content'].map(lambda x: len(x))
     print(point_df['text_len'].describe())
     import matplotlib.pyplot as plt
-
     plt.hist(point_df['text_len'], bins=30, rwidth=0.9, density=True, )
     plt.show()
     
