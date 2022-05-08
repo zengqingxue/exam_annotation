@@ -124,8 +124,8 @@ if __name__ == '__main__':
     s1 = time.time()
 
     # 加载数据集
-    train_x,train_y = load_data('./data/multi-classification-train.txt' + data_version)
-    test_x,test_y = load_data('./data/multi-classification-test.txt' + data_version)
+    train_x,train_y = load_data('./data/multi-classification-train.csv' + data_version)
+    test_x,test_y = load_data('./data/multi-classification-test.csv' + data_version)
 
     shuffle_index =[i for i in range(len(train_x))]
     random.shuffle(shuffle_index)

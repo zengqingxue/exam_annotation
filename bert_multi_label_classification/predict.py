@@ -21,7 +21,7 @@ def predict_single(test_text):
 
 
 def evaluate():
-    test_x,test_y = load_data('./data/multi-classification-test.txt')
+    test_x,test_y = load_data('./data/multi-classification-test.csv.all')
     true_y_list = mlb.transform(test_y)
 
     pred_y_list = []

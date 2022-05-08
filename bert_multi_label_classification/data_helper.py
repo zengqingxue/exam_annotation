@@ -95,7 +95,7 @@ def parse_arg():
 if __name__ == '__main__':
     args = parse_arg()
     oprate_option = args['oprate']
-    file_path = "./data/multi-classification-train.txt"
+    file_path = "./data/news_33.csv.1"
     if oprate_option == "split":
         split_train_test(file_path)
     elif oprate_option == "load":
