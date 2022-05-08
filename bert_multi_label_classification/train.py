@@ -12,10 +12,12 @@ from bert4keras.tokenizers import Tokenizer
 from bert4keras.snippets import sequence_padding, DataGenerator
 from sklearn.metrics import classification_report
 from bert4keras.optimizers import Adam
-import os,sys
-
+import os,sys,time
 from bert_model import build_bert_model
 from data_helper import load_data
+from loguru import logger
+logger.add('./logs/my.log', format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> - {module} - {function} - {level} - line:{line} - {message}", level="INFO",rotation='00:00',retention="3 day")
+
 
 #定义超参数和配置文件
 epochs = 3
@@ -82,7 +84,7 @@ class Evaluator(keras.callbacks.Callback):
         # model.load_weights(best_model_filepath)
         acc = cal_acc(test_x,test_y) # 计算多标签分类准确率
         if acc > self.best_acc:
-            print('Accuracy increased from {} to {} ,save model to {}'.format(self.best_acc,acc,best_model_filepath))
+            logger.info('Accuracy increased from {} to {} ,save model to {}'.format(self.best_acc,acc,best_model_filepath))
             self.best_acc = acc
             self.wait = 0
             model.save_weights(best_model_filepath)
@@ -91,17 +93,19 @@ class Evaluator(keras.callbacks.Callback):
             if self.wait >= self.patience:
                 self.stopped_epoch = epoch
                 self.model.stop_training = True
-        print('valid best acc: %.5f\n' % (self.best_acc))
+        logger.info('valid best acc: %.5f\n' % (self.best_acc))
 
     def on_train_end(self, logs=None):
         if self.stopped_epoch > 0:
-            print('Epoch %05d: early stopping' % (self.stopped_epoch + 1))
+            logger.info('Epoch %05d: early stopping' % (self.stopped_epoch + 1))
 
 
 model = build_bert_model(config_path,checkpoint_path,class_nums)
 
 
 if __name__ == '__main__':
+    s1 = time.time()
+
     # 加载数据集
     train_x,train_y = load_data('./data/multi-classification-train.txt')
     test_x,test_y = load_data('./data/multi-classification-test.txt')
@@ -113,7 +117,7 @@ if __name__ == '__main__':
 
     mlb = MultiLabelBinarizer()
     mlb.fit(train_y)
-    print("标签数量：",len(mlb.classes_))
+    logger.info("标签数量：",len(mlb.classes_))
     class_nums = len(mlb.classes_)
     pickle.dump(mlb, open('./checkpoint/mlb.pkl','wb'))
 
@@ -121,14 +125,14 @@ if __name__ == '__main__':
     test_y = mlb.transform(test_y)
 
     train_data = [[x,y.tolist()] for x,y in zip(train_x,train_y)] # 将相应的样本和标签组成一个tuple
-    print(train_data[:3])
+    logger.info(train_data[:3])
     test_data = [[x,y.tolist()] for x,y in zip(test_x,test_y)] # --> [[x1,y1],[x2,y2],[],..]
 
     # 转换数据集
     train_generator = data_generator(train_data, batch_size)
     test_generator = data_generator(test_data, batch_size)
 
-    print(model.summary())
+    logger.info(model.summary())
 
     evalutor = Evaluator()
 
@@ -142,18 +146,20 @@ if __name__ == '__main__':
         callbacks=[evalutor]
     )
 
-    model.load_weights(best_model_filepath)
-    test_pred = []
-    test_true = []
-    for x, y in test_generator:
-        p = model.predict(x).argmax(axis=1)
-        test_pred.extend(p)
-
-    test_true = test_data[:, 1].tolist()
-    print(set(test_true))
-    print(set(test_pred))
-
-    target_names = [line.strip() for line in open('label', 'r', encoding='utf8')]
-    print(classification_report(test_true, test_pred, target_names=target_names))
+    # model.load_weights(best_model_filepath)
+    # test_pred = []
+    # test_true = []
+    # for x, y in test_generator:
+    #     p = model.predict(x).argmax(axis=1)
+    #     test_pred.extend(p)
+    # 
+    # test_true = test_data[:,1].tolist()
+    # logger.info(set(test_true))
+    # logger.info(set(test_pred))
+    # 
+    # target_names = [line.strip() for line in open('label', 'r', encoding='utf8')]
+    # logger.info(classification_report(test_true, test_pred, target_names=target_names))
+    ss = time.time()
+    logger.info("训练耗时：{} min",(ss - s1) / 60)
 else:
     model.load_weights(best_model_filepath)
