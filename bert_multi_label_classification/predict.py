@@ -20,11 +20,11 @@ def predict_single(test_text):
 	pred = model.predict([[token_ids], [segment_ids]])
 	logger.info("pred[0]为: {}",pred[0])
 
-	label_index = np.where(pred[0]>threshold)[0] # 取概率值大于阈值的 onehot 向量索引, [12,34]
-	# 根据prob 排序 label_index
-	label_prob = {pred[0][i]:i for i in label_index}
-	rerank = sorted(label_prob.items(), key=lambda x: x[0], reverse=True)
-	label_index = [i[1] for i in rerank]
+	# label_index = np.where(pred[0]>threshold)[0] # 取概率值大于阈值的 onehot 向量索引, [12,34]
+	# # 根据prob 排序 label_index
+	# label_prob = {pred[0][i]:i for i in label_index}
+	# rerank = sorted(label_prob.items(), key=lambda x: x[0], reverse=True)
+	# label_index = [i[1] for i in rerank]
 
 	logger.info("label_index为: {}", label_index)
 	labels = [mlb.classes_.tolist()[i] for i in label_index]
