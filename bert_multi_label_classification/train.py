@@ -66,8 +66,6 @@ if maxlen > 512:
 # checkpoint_path='E:/bert_weight_files/roberta/bert_model.ckpt'
 # dict_path = 'E:/bert_weight_files/roberta/vocab.txt'
 
-best_model_filepath = best_model_filepath
-
 tokenizer = Tokenizer(dict_path)
 
 class data_generator(DataGenerator):
@@ -135,7 +133,7 @@ if __name__ == '__main__':
     s1 = time.time()
 
     # 加载数据集
-    train_x,train_y = load_data()
+    train_x,train_y = load_data(train_data)
     test_x,test_y = load_data(test_data)
 
     shuffle_index =[i for i in range(len(train_x))]
