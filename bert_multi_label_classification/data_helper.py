@@ -52,7 +52,7 @@ def split_train_test(file_path):
     point_df = point_df[["id","label", "content"]]
     df_train, df_test = train_test_split(point_df[:], test_size=0.2, shuffle=True)
     # df_valid, df_test = train_test_split(df_test[:], test_size=0.5, shuffle=True)
-    print("df_train",df_train)
+    logger.info("df_train",df_train)
     df_train.to_csv("./data/multi-classification-train.csv",sep="\t",header=None,index=None)
     df_test.to_csv("./data/multi-classification-test.csv",sep="\t",header=None,index=None)
 
