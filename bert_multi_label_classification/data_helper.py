@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 def analyze_textlen_labels(df):
     logger.info('{}文本标签数据分布{}',"===="*4,"===="*4)
     df = df.sample(frac=1.0)
-    logger.info("标签分布情况： {} \n",df['label'].value_counts())
+    logger.info("标签分布情况： \n {} ",df['label'].value_counts())
 
     logger.info('{}文本长度分度分布{}', "====" * 4, "====" * 4)
     logger.info("df.columns  为： {}",df.columns)
@@ -40,8 +40,9 @@ def split_train_test(file_path):
     # point_df = pd.read_table(file_path, sep=" ", header=None, names=["label", "content"])
     point_df = pd.read_csv(file_path, sep="\t", header=None, names=["id", "label", "content"])
     point_df.dropna(inplace=True)
-    logger.info("the dataset : \n{}", point_df)
-    logger.info("The shape of the dataset : \n{}", point_df.shape)
+    point_df = point_df.sample(frac=1.0)
+    logger.info("the dataset : \n {}", point_df)
+    logger.info("The shape of the dataset : \n {}", point_df.shape)
     logger.info("point_df.columns 为： {}",point_df.columns)
 
     # 数据分析

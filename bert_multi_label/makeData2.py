@@ -341,21 +341,30 @@ def merge_duplic_sample_label(df):
 if __name__ == '__main__':
     # inputfile, outputfile = './news_33.csv',"./news_33.csv.0"
     # read_csv_drop_duplicates(inputfile, outputfile)
-    args = parse_arg()
-    inputfile = args['tagname']
-    outputfile = args['label']
-    prefix = "/root/zengqingxue/exam_annotation/data/news/multi_cls/"
-    inputfile, outputfile = prefix+inputfile,prefix+outputfile
-    read_csv_postcate(inputfile, outputfile)
-    # argparams = parse_arg()
-    # pool = PooledDB(pymysql, 12, **zqkd_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
-    # recommend_db = pool.connection()
-    # pool = PooledDB(pymysql, 12, **zqkd_article_content, setsession=['SET AUTOCOMMIT = 1'])
-    # zqkd_content_db = pool.connection()
-    # tagname = argparams["tagname"]
-    # label = argparams["label"]
-    # query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
 
+    # region read_csv_postcate
+    # args = parse_arg()
+    # inputfile = args['tagname']
+    # outputfile = args['label']
+    # prefix = "/root/zengqingxue/exam_annotation/data/news/multi_cls/"
+    # inputfile, outputfile = prefix+inputfile,prefix+outputfile
+    # read_csv_postcate(inputfile, outputfile)
+    # endregion
+
+    # region 根据tagname抽取样本
+    argparams = parse_arg()
+    pool = PooledDB(pymysql, 12, **zqkd_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
+    recommend_db = pool.connection()
+    pool = PooledDB(pymysql, 12, **zqkd_article_content, setsession=['SET AUTOCOMMIT = 1'])
+    zqkd_content_db = pool.connection()
+    tagname = argparams["tagname"]
+    label = argparams["label"]
+    prefix = "/root/zengqingxue/exam_annotation/data/news/multi_cls/"
+    outputfile = prefix + label + ".csv"
+    query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
+    # endregion
+
+    # region others
     # df= pd.read_csv("./tmp0/id_title_27.csv",sep="\t",header=None,index_col=None,names=["id,title"])
     # import numpy as np
     # df = pd.DataFrame({"id":[11,22,33,44,555],
@@ -402,3 +411,4 @@ if __name__ == '__main__':
     # root     44884  7.1  0.1 830560 300164 pts/1   Sl   20:26   0:20 python makeData.py --mc1=80 --mc2=90
     # root     44888  7.2  0.2 864760 334236 pts/1   Sl   20:26   0:21 python makeData.py --mc1=90 --mc2=100
     #     """
+    # endregion

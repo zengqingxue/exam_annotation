@@ -15,8 +15,8 @@ def load_dataset():
     
     """ 1: 读取数据 """
     print("\n读取数据 ... \n")
-    # point_df = pd.read_csv(config.point_path, header=None, names=["id","label", "content"])
-    point_df = pd.read_table(config.point_path, sep="\t" ,header=None, names=["id","label", "content"])
+    point_df = pd.read_csv(config.point_path, header=None, names=["id","label", "content"])
+    # point_df = pd.read_table(config.point_path, sep="\t" ,header=None, names=["id","label", "content"])
     point_df = point_df[["label", "content"]]
     point_df.dropna(inplace=True)
     print(f"\nthe dataset : {point_df}\n")

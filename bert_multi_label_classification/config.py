@@ -34,11 +34,16 @@ class Config():
         self.maxlen = 256
         self.batch_size = 64
 
+def count():
+    from collections import Counter
+    a = ["生活","房产","生活","家居","生活","家居","房产","美文","文化","情感","美文","科学","家居","生活","美文","职场","美文","文化","职场","社会","三农","生活","时尚","美文","健康","生活","美食","健康","生活","健康","生活","家居","健康","情感","文化","美文","健康","三农","生活","家居","文化","科学","健康","三农","科学","三农","生活","文化","科学","生活","科学","社会","三农","生活","家居","美食","生活","科技","宠物","搞笑","美文","社会","情感","美文","职场","生活","家居","时尚","历史","文化","美文"]
+    print(Counter(a))
 if __name__ == '__main__':
-    print("config_path: ",config_path)
-    print("checkpoint_path: ",checkpoint_path)
-    print("dict_path: ",dict_path)
+    # print("config_path: ",config_path)
+    # print("checkpoint_path: ",checkpoint_path)
+    # print("dict_path: ",dict_path)
     pass
+    count()
 
 
 

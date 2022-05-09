@@ -58,7 +58,6 @@ import argparse
 # model_path = args['model_path']
 # data_version = args['data_version']
 
-
 if maxlen > 512:
     assert 0 is -1
     logger.info("train exits!!! maxlen of the input is larger than 512 which is the maxlen of pretrain bert")
@@ -84,7 +83,6 @@ class data_generator(DataGenerator):
                 batch_segment_ids = sequence_padding(batch_segment_ids)
                 yield [batch_token_ids, batch_segment_ids], np.asarray(batch_labels)
                 batch_token_ids, batch_segment_ids, batch_labels = [], [], []
-
 
 def cal_acc(text_list,label_label):
     cnt = 1e-8
@@ -168,7 +166,7 @@ if __name__ == '__main__':
         # validation_data=test_generator.forfit(),
         # validation_steps=len(test_generator),
         shuffle=True,
-        callbacks=[evalutor]# ,
+        # callbacks=[evalutor]# ,
         # callbacks = [earlystop, checkpoint]
     )
 
