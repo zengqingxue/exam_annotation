@@ -34,7 +34,7 @@ def evaluate():
         pred_y, pred_label = predict_single(text)
         pred_y_list.append(pred_y)
     # F1值
-    logger.info("F1值为：\n",classification_report(true_y_list, pred_y_list, digits=4,target_names=mlb.classes_.tolist()))#
+    logger.info("F1值为： {} \n",classification_report(true_y_list, pred_y_list, digits=4,target_names=mlb.classes_.tolist()))#
 
 
 if __name__ == '__main__':
