@@ -14,9 +14,7 @@ def analyze_textlen_labels(df):
     logger.info(df['label'].value_counts())
 
     logger.info('{}文本长度分度分布{}', "====" * 4, "====" * 4)
-    # df['text_len'] = df['content'].map(lambda x: len(x))
-    logger.info("df.columns为： {}",df.columns)
-    df['text_len'] = df['content'].apply(lambda x: len(x),axis=1)
+    logger.info("df.columns  为： {}",df.columns)
     logger.info(df['text_len'].describe(percentiles=[0.25, 0.5, 0.75, 0.8, 0.9, 0.95]))
     # import matplotlib.pyplot as plt
     # plt.hist(df['text_len'], bins=30, rwidth=0.9, density=True, )
@@ -41,15 +39,17 @@ def split_train_test(file_path):
     """切分训练集和测试集，并进行数据分析"""
     # point_df = pd.read_table(file_path, sep=" ", header=None, names=["label", "content"])
     point_df = pd.read_csv(file_path, sep="\t", header=None, names=["id", "label", "content"])
-    point_df = point_df[["label", "content"]]
     point_df.dropna(inplace=True)
     logger.info("\nthe dataset : {}\n", point_df)
     logger.info("\nThe shape of the dataset : {}\n", point_df.shape)
+    logger.info("point_df.columns 为： {}",point_df.columns)
 
     # 数据分析
+    point_df['text_len'] = point_df['content'].map(lambda x: len(x))
     analyze_textlen_labels(point_df)
 
     logger.info("\n划分数据集 ... \n")
+    point_df = point_df[["label", "content"]]
     df_train, df_test = train_test_split(point_df[:], test_size=0.2, shuffle=True)
     # df_valid, df_test = train_test_split(df_test[:], test_size=0.5, shuffle=True)
     print("df_train",df_train)
