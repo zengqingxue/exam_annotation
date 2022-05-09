@@ -125,7 +125,6 @@ class Evaluator(keras.callbacks.Callback):
         if self.stopped_epoch > 0:
             logger.info('Epoch %05d: early stopping' % (self.stopped_epoch + 1))
 
-checkpoint_path = "/data/zengqingxue/exam_annotation/bert_multi_label_classification/checkpoint/best_model.weights"
 model = build_bert_model(config_path,checkpoint_path,class_nums)
 
 
