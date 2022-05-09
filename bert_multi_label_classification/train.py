@@ -141,7 +141,7 @@ if __name__ == '__main__':
 
     mlb = MultiLabelBinarizer()
     mlb.fit(train_y)
-    logger.info("标签数量：",len(mlb.classes_))
+    logger.info("标签数量：{}",len(mlb.classes_))
     class_nums = len(mlb.classes_)
     pickle.dump(mlb, open('./checkpoint/mlb.pkl','wb'))
 
@@ -167,7 +167,8 @@ if __name__ == '__main__':
         # validation_data=test_generator.forfit(),
         # validation_steps=len(test_generator),
         shuffle=True,
-        callbacks=[evalutor]
+        callbacks=[evalutor]# ,
+        # callbacks = [earlystop, checkpoint]
     )
 
     # model.load_weights(best_model_filepath)

@@ -61,35 +61,41 @@ def build_bert_model(config_path,checkpoint_path,class_nums):
         lambda x:x[:,0],
         name='cls-token'
         )(bert.model.output) #shape=[batch_size,768]
-    all_token_embedding = keras.layers.Lambda(
-        lambda x:x[:,1:-1],
-        name='all-token'
-        )(bert.model.output) #shape=[batch_size,maxlen-2,768]
+    # all_token_embedding = keras.layers.Lambda(
+    #     lambda x:x[:,1:-1],
+    #     name='all-token'
+    #     )(bert.model.output) #shape=[batch_size,maxlen-2,768]
+    #
+    # cnn_features = textcnn(
+    #   all_token_embedding,'he_normal') #shape=[batch_size,cnn_output_dim]
+    # concat_features = keras.layers.concatenate(
+    #   [cls_features,cnn_features],
+    #   axis=-1)
 
-    cnn_features = textcnn(
-      all_token_embedding,'he_normal') #shape=[batch_size,cnn_output_dim]
-    concat_features = keras.layers.concatenate(
-      [cls_features,cnn_features],
-      axis=-1)
+    # concat_features = keras.layers.Dropout(0.2)(concat_features)
+    # dense = keras.layers.Dense(
+    #       units=256,
+    #       activation='relu',
+    #       kernel_initializer='he_normal'
+    #   )(concat_features)
 
-    concat_features = keras.layers.Dropout(0.2)(concat_features)
-
-    dense = keras.layers.Dense(
-          units=256,
-          activation='relu',
-          kernel_initializer='he_normal'
-      )(concat_features)
+    # output = keras.layers.Dense(
+    #         units=class_nums,
+    #         activation='sigmoid', # 多分类模型变多标签模型 softmax --> sigmoid
+    #         kernel_initializer='he_normal'
+    #     )(dense)
 
     output = keras.layers.Dense(
-            units=class_nums,
-            activation='sigmoid', # 多分类模型变多标签模型 softmax --> sigmoid
-            kernel_initializer='he_normal'
-        )(dense)
+        units=class_nums,
+        activation='sigmoid',  # 多分类模型变多标签模型 softmax --> sigmoid
+        kernel_initializer='he_normal'
+    )(cls_features)
 
     model = keras.models.Model(bert.model.input,output)
     model.compile(
         loss='binary_crossentropy',#二分类交叉熵损失函数
-        optimizer=Adam(5e-5), 
+        # optimizer=Adam(5e-5),
+        optimizer=Adam(4e-5),
         metrics=['accuracy'],
     )
 
