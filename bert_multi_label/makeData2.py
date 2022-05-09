@@ -142,8 +142,8 @@ import math
 
 def query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label):
     with recommend_db.cursor(pymysql.cursors.DictCursor) as cursor:
-        # query_sql = """SELECT id,title FROM wx_feed where tagname in (%s)  and `type`=1"""%",".join(["'%s'"] * len(tagname.split(",")))%(tuple(tagname.split(",")))
-        query_sql = """SELECT id,title FROM wx_feed where tag_id in (%s)  and `type`=1"""%(tagname)
+        query_sql = """SELECT id,title FROM wx_feed where tagname in (%s)  and `type`=1"""%",".join(["'%s'"] * len(tagname.split(",")))%(tuple(tagname.split(",")))
+        # query_sql = """SELECT id,title FROM wx_feed where tag_id in (%s)  and `type`=1"""%(tagname)
         print("query_sql: ",query_sql)
         row_num = cursor.execute(query_sql)
         if row_num:
