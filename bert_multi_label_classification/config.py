@@ -11,8 +11,8 @@ import os,sys
 cur_dir = os.getcwd()
 parent_dir = os.path.abspath(os.path.join(cur_dir,os.path.pardir))
 model_dir_name = "albert_tiny_google_zh_489k"   # "chinese_L-12_H-768_A-12"  "albert_tiny_google_zh_489k"
-config_path= os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/bert_config.json".format(model_dir_name)))
-checkpoint_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/bert_model.ckpt".format(model_dir_name)))
+config_path= os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/albert_config.json".format(model_dir_name)))
+checkpoint_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/albert_model.ckpt".format(model_dir_name)))
 dict_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/vocab.txt".format(model_dir_name)))
 
 
