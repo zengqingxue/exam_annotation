@@ -37,8 +37,8 @@ def split_train_test(df,test_size=0.2,is_names=False,names=None,is_valid=False):
 
 def split_train_test(file_path):
     """切分训练集和测试集，并进行数据分析"""
-    # point_df = pd.read_table(file_path, sep=" ", header=None, names=["label", "content"])
-    point_df = pd.read_table(file_path, sep="\t", header=None, names=["id", "label", "content"])
+    point_df = pd.read_table(file_path, sep=" ", header=None, names=["label", "content"])
+    # point_df = pd.read_table(file_path, sep="\t", header=None, names=["id", "label", "content"])
     point_df = point_df[["label", "content"]]
     point_df.dropna(inplace=True)
     logger.info("\nthe dataset : {}\n", point_df)
