@@ -361,6 +361,7 @@ if __name__ == '__main__':
     label = argparams["label"]
     # prefix = "/root/zengqingxue/exam_annotation/data/news/multi_cls/"
     # outputfile = prefix + label + ".csv"
+
     query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
     # endregion
 
