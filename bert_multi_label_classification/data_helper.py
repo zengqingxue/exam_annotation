@@ -22,17 +22,17 @@ def analyze_textlen_labels(df):
     # plt.show()
 
 
-def split_train_test(df,test_size=0.2,is_names=False,names=None,is_valid=False):
-    if is_names:
-        df = df[names]
-    df.dropna(inplace=True)
-    logger.info("the dataset : {}\n", df)
-    logger.info("The shape of the dataset : {}", df.shape)
-    logger.info("开始划分数据集 ...... ")
-    df_train, df_test = train_test_split(df[:], test_size=test_size, shuffle=True)
-    if is_valid:
-        df_valid, df_test = train_test_split(df_test[:], test_size=0.5, shuffle=True)
-    return df_train,df_test
+# def split_train_test(df,test_size=0.2,is_names=False,names=None,is_valid=False):
+#     if is_names:
+#         df = df[names]
+#     df.dropna(inplace=True)
+#     logger.info("the dataset : {}\n", df)
+#     logger.info("The shape of the dataset : {}", df.shape)
+#     logger.info("开始划分数据集 ...... ")
+#     df_train, df_test = train_test_split(df[:], test_size=test_size, shuffle=True)
+#     if is_valid:
+#         df_valid, df_test = train_test_split(df_test[:], test_size=0.5, shuffle=True)
+#     return df_train,df_test
 
 
 def split_train_test(file_path):
@@ -49,7 +49,7 @@ def split_train_test(file_path):
     analyze_textlen_labels(point_df)
 
     logger.info("\n划分数据集 ... \n")
-    point_df = point_df[["label", "content"]]
+    point_df = point_df[["id","label", "content"]]
     df_train, df_test = train_test_split(point_df[:], test_size=0.2, shuffle=True)
     # df_valid, df_test = train_test_split(df_test[:], test_size=0.5, shuffle=True)
     print("df_train",df_train)
@@ -67,15 +67,14 @@ def load_data(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         for line in f.readlines():
             line = line.strip().split("\t") # line = ['label1 label2','sample_text']
-            label_list.append(line[0].split(" "))
+            label_list.append(line[1].split(" "))
             label_list1.append(line[1])
-            sample_list.append(line[1])
+            sample_list.append(line[2])
             # line = line.strip().split(" ") # line = ['label1|label2','sample_text']
             # label_list.append(line[0].split("|"))
             # sample_list.append(line[1])
 
     # 分文本长度及标签分布
-    label_list.append(line[1].split(" "))
     text_len = [len(text) for text in sample_list]
     df = pd.DataFrame()
     df['text_len'] = text_len
