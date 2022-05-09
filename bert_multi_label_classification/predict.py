@@ -18,8 +18,10 @@ logger.info(mlb.classes_.tolist())
 def predict_single(test_text):
 	token_ids, segment_ids = tokenizer.encode(test_text, maxlen=maxlen)
 	pred = model.predict([[token_ids], [segment_ids]])
+	logger.info("pred[0]为: {}",pred[0])
 
 	label_index = np.where(pred[0]>threshold)[0] # 取概率值大于阈值的 onehot 向量索引, [12,34]
+	logger.info("label_index为: {}", label_index)
 	labels = [mlb.classes_.tolist()[i] for i in label_index]
 	one_hot_label = np.where(pred[0]>threshold,1,0) # [[0,0,1,0,0,..],[0,0,1,0,1,..]]
 	return one_hot_label, ' '.join(labels)
