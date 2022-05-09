@@ -53,4 +53,4 @@ if __name__ == '__main__':
 	one_hot,label = predict_single(test_text)
 	logger.info("测试样本预测标签： {} \n one_hot为: {}",label,one_hot)
 
-	evaluate()
+	# evaluate()
