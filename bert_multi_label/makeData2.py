@@ -168,7 +168,7 @@ def query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label):
             title_content_df['title_content'] = title_content_df['title'].str.cat(title_content_df["content"],sep="__")
             title_content_df['label'] = label
             title_content_df =  title_content_df[['id','label','title_content']]
-            title_content_df.to_csv("./{}.csv".format(label), sep="\t", header=None, index=None)
+            title_content_df.to_csv("../data/news/multi_cls/{}.csv".format(label), sep="\t", header=None, index=None)
 
 
 def query_batch(recommend_db):
@@ -359,8 +359,8 @@ if __name__ == '__main__':
     zqkd_content_db = pool.connection()
     tagname = argparams["tagname"]
     label = argparams["label"]
-    prefix = "/root/zengqingxue/exam_annotation/data/news/multi_cls/"
-    outputfile = prefix + label + ".csv"
+    # prefix = "/root/zengqingxue/exam_annotation/data/news/multi_cls/"
+    # outputfile = prefix + label + ".csv"
     query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
     # endregion
 
