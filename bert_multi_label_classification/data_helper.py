@@ -13,7 +13,7 @@ def analyze_textlen_labels(df):
     df = df.sample(frac=1.0)
     logger.info(df['label'].value_counts())
 
-    logger.info('{}文本长度分度分布{}', "====" * 10, "====" * 10)
+    logger.info('{}文本长度分度分布{}', "====" * 4, "====" * 4)
     df['text_len'] = df['content'].map(lambda x: len(x))
     logger.info(df['text_len'].describe(percentiles=[0.25, 0.5, 0.75, 0.8, 0.9, 0.95]))
     # import matplotlib.pyplot as plt
@@ -51,8 +51,8 @@ def split_train_test(file_path):
     df_train, df_test = train_test_split(point_df[:], test_size=0.2, shuffle=True)
     # df_valid, df_test = train_test_split(df_test[:], test_size=0.5, shuffle=True)
     print("df_train",df_train)
-    df_train.to_csv("./data/multi-classification-train1.csv",sep="\t",header=None,index=None)
-    df_test.to_csv("./data/multi-classification-test1.csv",sep="\t",header=None,index=None)
+    df_train.to_csv("./data/multi-classification-train.csv",sep="\t",header=None,index=None)
+    df_test.to_csv("./data/multi-classification-test.csv",sep="\t",header=None,index=None)
 
 
 def load_data(file_path):
@@ -61,24 +61,24 @@ def load_data(file_path):
     """
     sample_list = []
     label_list = []
-    # label_list1 = []
+    label_list1 = []
     with open(file_path, "r", encoding="utf-8") as f:
         for line in f.readlines():
             line = line.strip().split("\t") # line = ['label1 label2','sample_text']
             label_list.append(line[0].split(" "))
-            # label_list1.append(line[1])
+            label_list1.append(line[1])
             sample_list.append(line[1])
             # line = line.strip().split(" ") # line = ['label1|label2','sample_text']
             # label_list.append(line[0].split("|"))
             # sample_list.append(line[1])
 
     # 分文本长度及标签分布
-    # label_list.append(line[1].split(" "))
-    # text_len = [len(text) for text in sample_list]
-    # df = pd.DataFrame()
-    # df['text_len'] = text_len
-    # df['label'] = label_list1
-    # analyze_textlen_labels(df)
+    label_list.append(line[1].split(" "))
+    text_len = [len(text) for text in sample_list]
+    df = pd.DataFrame()
+    df['text_len'] = text_len
+    df['label'] = label_list1
+    analyze_textlen_labels(df)
 
     logger.info("sample_list[:2]: {}",sample_list[:2])
     logger.info("label_list[:2]: {}",label_list[:2])

@@ -5,9 +5,14 @@ from sklearn.metrics import hamming_loss, classification_report
 from train import *
 from loguru import logger
 logger.add('./logs/my.log', format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> - {module} - {function} - {level} - line:{line} - {message}", level="INFO",rotation='00:00',retention="3 day")
-mlb = pickle.load(open('./checkpoint/mlb.pkl','rb'))
-print(mlb.classes_.tolist())
-threshold = 0.5
+from config import Config
+
+config = Config()
+mlb_path = config.mlb_path
+threshold = config.prob_threshold
+test_data = config.test_data
+mlb = pickle.load(open(mlb_path,'rb'))
+logger.info(mlb.classes_.tolist())
 
 
 def predict_single(test_text):
@@ -21,7 +26,7 @@ def predict_single(test_text):
 
 
 def evaluate():
-    test_x,test_y = load_data('./data/multi-classification-test.csv.all')
+    test_x,test_y = load_data(test_data)
     true_y_list = mlb.transform(test_y)
 
     pred_y_list = []

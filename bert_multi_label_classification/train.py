@@ -17,6 +17,23 @@ from bert_model import build_bert_model
 from data_helper import load_data
 from loguru import logger
 logger.add('./logs/my.log', format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> - {module} - {function} - {level} - line:{line} - {message}", level="INFO",rotation='00:00',retention="3 day")
+
+from config import Config
+config = Config()
+dict_path = config.dict_path
+config_path = config.config_path
+checkpoint_path = config.checkpoint_path
+bert4keras_model_name = config.bert4keras_model_name
+epochs = config.epochs
+class_nums = config.class_nums
+maxlen = config.maxlen
+batch_size = config.maxlen
+train_data = config.train_data
+test_data = config.test_data
+best_model_filepath = config.best_model_filepath
+mlb_path = config.mlb_path
+prob_threshold = config.prob_threshold
+
 import argparse
 #
 # def parse_arg():
@@ -31,6 +48,7 @@ import argparse
 #     return vars(args)
 
 
+
 #定义超参数和配置文件
 # args = parse_arg()
 # epochs = args['epochs']
@@ -40,29 +58,15 @@ import argparse
 # model_path = args['model_path']
 # data_version = args['data_version']
 
-epochs = 3
-class_nums = 30
-maxlen = 512
-batch_size = 16
-model_path = ""
-data_version = ".all"
 
 if maxlen > 512:
     assert 0 is -1
     logger.info("train exits!!! maxlen of the input is larger than 512 which is the maxlen of pretrain bert")
-
-cur_dir = os.getcwd()
-parent_dir = os.path.abspath(os.path.join(cur_dir,os.path.pardir))
-config_path= os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/chinese_L-12_H-768_A-12/bert_config.json"))
-checkpoint_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/chinese_L-12_H-768_A-12/bert_model.ckpt"))
-dict_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/chinese_L-12_H-768_A-12/vocab.txt"))
-
 # config_path='E:/bert_weight_files/roberta/bert_config_rbt3.json'
 # checkpoint_path='E:/bert_weight_files/roberta/bert_model.ckpt'
 # dict_path = 'E:/bert_weight_files/roberta/vocab.txt'
 
-best_model_filepath = './checkpoint/best_model.weights'
-# best_model_filepath = best_model_filepath + model_path
+best_model_filepath = best_model_filepath
 
 tokenizer = Tokenizer(dict_path)
 
@@ -90,7 +94,7 @@ def cal_acc(text_list,label_label):
     for text,label in tqdm(zip(text_list,label_label)):
         token_ids, segment_ids = tokenizer.encode(text, maxlen=maxlen)
         pred = model.predict([[token_ids], [segment_ids]])
-        pred = np.where(pred[0]>0.5,1,0)
+        pred = np.where(pred[0]>prob_threshold,1,0)
         cnt += 1-(label!=pred).any()
 
     return cnt/total
@@ -131,8 +135,8 @@ if __name__ == '__main__':
     s1 = time.time()
 
     # 加载数据集
-    train_x,train_y = load_data('./data/multi-classification-train.csv' + data_version)
-    test_x,test_y = load_data('./data/multi-classification-test.csv' + data_version)
+    train_x,train_y = load_data()
+    test_x,test_y = load_data(test_data)
 
     shuffle_index =[i for i in range(len(train_x))]
     random.shuffle(shuffle_index)
@@ -143,7 +147,7 @@ if __name__ == '__main__':
     mlb.fit(train_y)
     logger.info("标签数量：{}",len(mlb.classes_))
     class_nums = len(mlb.classes_)
-    pickle.dump(mlb, open('./checkpoint/mlb.pkl','wb'))
+    pickle.dump(mlb, open(mlb_path,'wb'))
 
     train_y = mlb.transform(train_y) # [[label1,label2],[label3]] --> [[1,1,0],[0,0,1]]
     test_y = mlb.transform(test_y)
