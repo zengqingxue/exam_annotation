@@ -18,15 +18,15 @@ logger.info(mlb.classes_.tolist())
 def predict_single(test_text):
 	token_ids, segment_ids = tokenizer.encode(test_text, maxlen=maxlen)
 	pred = model.predict([[token_ids], [segment_ids]])
-	logger.info("pred[0]为: {}",pred[0])
+	# logger.info("pred[0]为: {}",pred[0])  # [0.02932817 0.01193303 0.01801807 0.01078114 0.03271604 0.00723782 0.00526589 0.01810303 0.01850012 0.1729838  0.03325847 0.9445205 0.01348689 0.0206328  0.02976313 0.02742192 0.01958296 0.01596066 0.01631451 0.0150286  0.9734022  0.02540401 0.0259234  0.02891338 0.02607271 0.02904323 0.01066586 0.03717667 0.01661459 0.02910403]
 
-	# label_index = np.where(pred[0]>threshold)[0] # 取概率值大于阈值的 onehot 向量索引, [12,34]
+	label_index = np.where(pred[0]>threshold)[0] # 取概率值大于阈值的 onehot 向量索引, [12,34]
 	# # 根据prob 排序 label_index
 	# label_prob = {pred[0][i]:i for i in label_index}
 	# rerank = sorted(label_prob.items(), key=lambda x: x[0], reverse=True)
 	# label_index = [i[1] for i in rerank]
 
-	logger.info("label_index为: {}", label_index)
+	# logger.info("label_index为: {}", label_index)
 	labels = [mlb.classes_.tolist()[i] for i in label_index]
 	one_hot_label = np.where(pred[0]>threshold,1,0) # [[0,0,1,0,0,..],[0,0,1,0,1,..]]
 	return one_hot_label, ' '.join(labels)
