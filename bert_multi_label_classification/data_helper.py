@@ -14,7 +14,9 @@ def analyze_textlen_labels(df):
     logger.info(df['label'].value_counts())
 
     logger.info('{}文本长度分度分布{}', "====" * 4, "====" * 4)
-    df['text_len'] = df['content'].map(lambda x: len(x))
+    # df['text_len'] = df['content'].map(lambda x: len(x))
+    logger.info("df.columns为： {}",df.columns)
+    df['text_len'] = df['content'].apply(lambda x: len(x),axis=1)
     logger.info(df['text_len'].describe(percentiles=[0.25, 0.5, 0.75, 0.8, 0.9, 0.95]))
     # import matplotlib.pyplot as plt
     # plt.hist(df['text_len'], bins=30, rwidth=0.9, density=True, )
