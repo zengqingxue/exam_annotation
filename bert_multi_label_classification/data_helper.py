@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 def analyze_textlen_labels(df):
     logger.info('{}文本标签数据分布{}',"===="*4,"===="*4)
     df = df.sample(frac=1.0)
-    logger.info(df['label'].value_counts())
+    logger.info("标签分布情况： {} \n",df['label'].value_counts())
 
     logger.info('{}文本长度分度分布{}', "====" * 4, "====" * 4)
     logger.info("df.columns  为： {}",df.columns)
@@ -40,8 +40,8 @@ def split_train_test(file_path):
     # point_df = pd.read_table(file_path, sep=" ", header=None, names=["label", "content"])
     point_df = pd.read_csv(file_path, sep="\t", header=None, names=["id", "label", "content"])
     point_df.dropna(inplace=True)
-    logger.info("\nthe dataset : {}\n", point_df)
-    logger.info("\nThe shape of the dataset : {}\n", point_df.shape)
+    logger.info("the dataset : \n{}", point_df)
+    logger.info("The shape of the dataset : \n{}", point_df.shape)
     logger.info("point_df.columns 为： {}",point_df.columns)
 
     # 数据分析
@@ -52,7 +52,7 @@ def split_train_test(file_path):
     point_df = point_df[["id","label", "content"]]
     df_train, df_test = train_test_split(point_df[:], test_size=0.2, shuffle=True)
     # df_valid, df_test = train_test_split(df_test[:], test_size=0.5, shuffle=True)
-    logger.info("df_train",df_train)
+    logger.info("df_train: {}",df_train)
     df_train.to_csv("./data/multi-classification-train.csv",sep="\t",header=None,index=None)
     df_test.to_csv("./data/multi-classification-test.csv",sep="\t",header=None,index=None)
 
