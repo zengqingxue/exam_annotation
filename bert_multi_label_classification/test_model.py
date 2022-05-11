@@ -42,8 +42,8 @@ bert = build_transformer_model(
 )
 
 encoder = keras.models.Model(bert.model.inputs, bert.model.outputs[0])
-export_path = "abc"
-base = 'test'
+export_path = "/data/zengqingxue/exam_annotation/bert_multi_label_classification/test"
+base = "/data/zengqingxue/exam_annotation/bert_multi_label_classification/test"
 
 encoder.save(base + r'\150k\1',save_format='tf') # <====注意model path里面的1是代表版本号，必须有这个不然tf serving 会报找不到可以serve的model
 #
