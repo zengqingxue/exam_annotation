@@ -35,6 +35,7 @@ tokenizer = Tokenizer(dict_path, do_lower_case=True)  # 建立分词器
 bert = build_transformer_model(
     config_path,
     checkpoint_path,
+    model="albert",
     with_pool='linear',
     application='unilm',
     return_keras_model=False,
