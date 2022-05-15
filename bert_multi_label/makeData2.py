@@ -89,7 +89,8 @@ def read_csv_postcate(inputfile,outputfile):
         itemId = row[1]
         sentence = row[3]
         cate = get_predictions(itemId, sentence)
-        row = str(itemId) + "\t" + cate + " " + row[2] + "\t" + sentence + "\n"
+        # row = str(itemId) + "\t" + cate + " " + row[2] + "\t" + sentence + "\n"
+        row = str(itemId) + "\t" + cate.split(" ")[0] + "\t" + sentence + "\n"
         fp.write(row)
         count += 1
         print("{} -----".format(count))
@@ -105,7 +106,6 @@ def contentParser(content):
         print("line: ", content)
     return line
 
-
 def remove_punctuation(line):
     """去掉空格标点符号"""
     line = str(line)
@@ -117,7 +117,6 @@ def remove_punctuation(line):
 
 def remove_html_punc(content):
     return remove_punctuation(contentParser(content))
-
 
 def query_mysql(db, sql):
     rows = []
@@ -170,7 +169,6 @@ def query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label):
             title_content_df =  title_content_df[['id','label','title_content']]
             title_content_df.to_csv("../data/news/multi_cls/{}.csv".format(label), sep="\t", header=None, index=None)
 
-
 def query_batch(recommend_db):
     """分页查询msyqL"""
     # db = pymysql.connect(**zq_wx_feed)
@@ -197,12 +195,10 @@ def query_batch(recommend_db):
                 id_title_df.to_csv("./id_title_{}.csv".format(i), sep="\t", header=None, index=None)
                 print(i)
 
-
 def query_content():
     id_title_df = pd.read_csv("../data/news/traindata/id_title_2.csv", sep="\t", skiprows=0, header="infer"
                               , names=["id", "title"])
     id_list = id_title_df['id'].values.tolist()
-
 
 def main1():
     # sql_title = "SELECT id,tag_id,title,abstract from wx_feed where id in (42870841)"
@@ -238,7 +234,6 @@ def main1():
 
     df = pd.read_table("./news_data_cat.txt", sep="\t", header=None, names=["id", "cate", "title"])
     df.to_csv("./news_data_cat.csv", sep="\t", index=None, header=["id", "cate", "title"])
-
 
 def worker(num, file, zqkd_content_db):
     print("开始file: ", file)
@@ -341,6 +336,10 @@ def merge_duplic_sample_label(df):
 if __name__ == '__main__':
     # inputfile, outputfile = './news_33.csv',"./news_33.csv.0"
     # read_csv_drop_duplicates(inputfile, outputfile)
+    itemId = "11111"
+    # sentences = "同行密接人员手机自查最快只要3秒钟打开方式戳这里__近日全国多地疫情出现反复武汉今日新增确诊病例7例湖北疫情防控措施全面升级目前国家政务服务平台已在支付宝上线了同行密接人员自查服务武汉用户可上支付宝搜同行自查免费查询或者在支付宝小程序国家政务服务平台里点击同行密接人员自查最快只需3秒钟查一查更安心同行自查服务由国家政务服务平台和卫健委联合提供14天内乘坐过飞机或者火车等公共交通工具出行的朋友可放心查询为了方便您下次更快速找到该服务可以点击右上角将小程序添加到支付宝首页此外如果你想知道自己所在地区或者出行目的地地区的疫情风险等级国务院客户端已在支付宝上线了查询服务您可搜疫情等级查看需要注意的是湖北近日将加大对各公共场所健康码绿码查验工作出入火车站机场医院商场等公共场所或者搭乘公交地铁均需出示健康码为方便快速找到健康码建议武汉市民将健康码添加到支付宝首页可快速打开核验长江日报出品采写记者张珺编辑叶凤校对熊琳琳"
+    sentences = "断卡行动交易流水达30亿元涉案26人宁夏一起杀猪盘诈骗案件宣判__历时8个月中宁县公安局成功侦破了一起财产损失最大的杀猪盘诈骗案件打掉洗钱团伙2个抓获犯罪嫌疑人26名扣押作案手机50余部涉案银行卡电话卡400余张冻结涉案资金120余万元为受害群众挽回损失近50余万元26名犯罪嫌疑人全部判处实刑2020年3月26日辖区群众陈某到中宁县公安局报警称2020年3月5日其在某网站上遇到一男子后发展为恋爱关系之后按照对方介绍的方法在一个网站上注册进行投资投资后很长时间无法提现逐渐意识到被骗共累计损失69余万元该案是当时中宁县发生电信网络诈骗案件财产损失最大的一起杀猪盘诈骗案件案发后中宁县公安局党委高度重视立即成立工作专班对该案的资金流进行梳理经过分析研判顺线追踪确定了位于河南云南的两个专门从事洗钱的犯罪团伙并通过进一步侦查逐渐查清了这两个团伙的活动轨迹组织结构和成员身份信息之后经过多次会商研究专案组果断决定收网参战民警克服异地抓捕对地形环境不熟悉犯罪团伙流动性大审讯羁押等一系列困难昼夜奋战辗转河南山东云南广州等地成功打掉了这两个为诈骗犯罪分子洗钱的团伙共抓获犯罪嫌疑人26名现场扣押作案手机50余部涉案银行卡电话卡400余张据了解该团伙成员和境外电信网络诈骗团伙勾结长期大量收购手机卡银行卡和转账U盾等配套工具为境外电信网络诈骗团伙实施违法犯罪提供支付结算工具两个犯罪团伙涉及的银行卡交易流水高达数亿元该案于2021年7月初由中宁县人民法院依法作出判决涉案26人分别被判处八个月至二年四个月不等的有期徒刑是中宁县宣判的首个特大网络杀猪盘类诈骗案件也是目前为止获刑人数最多的电信网络诈骗案件中宁县公安局将继续深入开展断卡行动不断提升对电信网络诈骗犯罪的打击力度全力遏制电信网络诈骗犯罪的高发多发态势为维护社会大局稳定保护人民群众生命财产安全作出更大的贡献声明本文来源平安中宁在此致谢"
+    print(get_predictions(itemId, sentences))
 
     # region read_csv_postcate
     # args = parse_arg()
@@ -351,19 +350,19 @@ if __name__ == '__main__':
     # read_csv_postcate(inputfile, outputfile)
     # endregion
 
-    # region 根据tagname抽取样本
-    argparams = parse_arg()
-    pool = PooledDB(pymysql, 12, **zqkd_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
-    recommend_db = pool.connection()
-    pool = PooledDB(pymysql, 12, **zqkd_article_content, setsession=['SET AUTOCOMMIT = 1'])
-    zqkd_content_db = pool.connection()
-    tagname = argparams["tagname"]
-    label = argparams["label"]
-    # prefix = "/root/zengqingxue/exam_annotation/data/news/multi_cls/"
-    # outputfile = prefix + label + ".csv"
-
-    query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
-    # endregion
+    # # region 根据tagname抽取样本
+    # argparams = parse_arg()
+    # pool = PooledDB(pymysql, 12, **zqkd_wx_feed, setsession=['SET AUTOCOMMIT = 1'])
+    # recommend_db = pool.connection()
+    # pool = PooledDB(pymysql, 12, **zqkd_article_content, setsession=['SET AUTOCOMMIT = 1'])
+    # zqkd_content_db = pool.connection()
+    # tagname = argparams["tagname"]
+    # label = argparams["label"]
+    # # prefix = "/root/zengqingxue/exam_annotation/data/news/multi_cls/"
+    # # outputfile = prefix + label + ".csv"
+    #
+    # query_title_content_tagname(recommend_db,tagname,zqkd_content_db,label)
+    # # endregion
 
     # region others
     # df= pd.read_csv("./tmp0/id_title_27.csv",sep="\t",header=None,index_col=None,names=["id,title"])

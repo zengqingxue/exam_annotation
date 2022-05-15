@@ -771,6 +771,8 @@ def main(_):
             is_training=True,
             drop_remainder=True)
         # early_stopping_hook = ''
+
+        tf.logging.info("44444"*20)
         # logging_hook = tf.train.LoggingTensorHook({"loss": "total_loss"}, every_n_iter=10)
         # estimator.train(input_fn=train_input_fn, max_steps=num_train_steps,hooks=[logging_hook])
         estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)

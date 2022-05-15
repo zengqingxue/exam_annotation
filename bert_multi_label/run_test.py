@@ -4,6 +4,8 @@ from config import Config
 import os
 from sklearn.preprocessing import MultiLabelBinarizer
 
+
+print("================开始 run_test============================")
 config = Config()
 
 all_labels = open(config.class_path,encoding="utf-8").readlines()
