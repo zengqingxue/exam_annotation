@@ -172,7 +172,7 @@ if __name__ == '__main__':
         # validation_data=test_generator.forfit(),
         # validation_steps=len(test_generator),
         shuffle=True,
-        callbacks=[evalutor]# ,
+        # callbacks=[evalutor]   # ,
         # callbacks = [earlystop, checkpoint]
     )
 
