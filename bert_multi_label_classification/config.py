@@ -24,8 +24,8 @@ class Config():
         self.mlb_path =  './checkpoint/mlb.pkl'
         self.best_model_filepath =  './checkpoint/best_model.weights'
         self.h5_path =  './checkpoint/best_model.h5'
-        self.train_data =  './data/multi-classification-train.csv.8000'
-        self.test_data =  './data/multi-classification-test.csv.2000'
+        self.train_data =  './data/multi-classification-train.csv'
+        self.test_data =  './data/multi-classification-test.csv'
 
         self.prob_threshold = 0.5
         self.bert4keras_model_name = "albert"     # "bert" "albert"
