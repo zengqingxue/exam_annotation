@@ -6,7 +6,12 @@ import numpy as np
 import random
 from tqdm import tqdm
 from sklearn.preprocessing import MultiLabelBinarizer
-os.environ['TF_KERAS'] = '1'
+
+# 设置TF_KERAS = 1，表示使用tf.keras
+import os
+os.environ["TF_KERAS"] = '1'
+from tensorflow.keras.models import load_model
+
 from bert4keras.backend import keras
 from bert4keras.tokenizers import Tokenizer
 from bert4keras.snippets import sequence_padding, DataGenerator
