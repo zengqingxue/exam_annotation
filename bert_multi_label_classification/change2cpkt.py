@@ -22,7 +22,7 @@ from bert4keras.snippets import sequence_padding, DataGenerator
 from sklearn.metrics import classification_report
 from bert4keras.optimizers import Adam
 import os,sys,time
-from bert_model import build_bert_model,
+from bert_model import build_bert_model
 from data_helper import load_data
 from loguru import logger
 logger.add('./logs/my.log', format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> - {module} - {function} - {level} - line:{line} - {message}", level="INFO",rotation='00:00',retention="3 day")

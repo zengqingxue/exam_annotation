@@ -31,6 +31,7 @@ batch_size = config.maxlen
 train_data = config.train_data
 test_data = config.test_data
 best_model_filepath = config.best_model_filepath
+h5_path = config.h5_path
 mlb_path = config.mlb_path
 prob_threshold = config.prob_threshold
 
@@ -166,9 +167,11 @@ if __name__ == '__main__':
         # validation_data=test_generator.forfit(),
         # validation_steps=len(test_generator),
         shuffle=True,
-        # callbacks=[evalutor]# ,
+        callbacks=[evalutor]# ,
         # callbacks = [earlystop, checkpoint]
     )
+
+    model.save_weights(best_model_filepath)
 
     # model.load_weights(best_model_filepath)
     # test_pred = []
@@ -183,6 +186,8 @@ if __name__ == '__main__':
     # 
     # target_names = [line.strip() for line in open('label', 'r', encoding='utf8')]
     # logger.info(classification_report(test_true, test_pred, target_names=target_names))
+
+    model.save(h5_path)
     ss = time.time()
     logger.info("训练耗时：{} min",(ss - s1) / 60)
 else:
