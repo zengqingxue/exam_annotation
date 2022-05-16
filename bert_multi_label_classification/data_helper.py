@@ -68,7 +68,10 @@ def load_data(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         for line in f.readlines():
             line = line.strip().split("\t") # line = ['label1 label2','sample_text']
-            label_list.append(line[1].split(" "))
+            label = line[1].split(" ")
+            if '' in label:
+                continue
+            label_list.append(label)
             label_list1.append(line[1])
             sample_list.append(line[2])
             # line = line.strip().split(" ") # line = ['label1|label2','sample_text']
