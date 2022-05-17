@@ -9,7 +9,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 
 # 设置TF_KERAS = 1，表示使用tf.keras
 import os
-os.environ["TF_KERAS"] = '1'
+# os.environ["TF_KERAS"] = '1'
 from tensorflow.keras.models import load_model
 
 from bert4keras.backend import keras
