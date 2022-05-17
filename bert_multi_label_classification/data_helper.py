@@ -70,6 +70,7 @@ def load_data(file_path):
             line = line.strip().split("\t") # line = ['label1 label2','sample_text']
             label = line[1].split(" ")
             if '' in label:
+                label.remove('')
                 continue
             label_list.append(label)
             label_list1.append(line[1])
