@@ -172,10 +172,10 @@ if __name__ == '__main__':
         train_generator.forfit(),
         steps_per_epoch=len(train_generator),
         epochs=epochs,
-        # validation_data=test_generator.forfit(),
-        # validation_steps=len(test_generator),
+        validation_data=test_generator.forfit(),
+        validation_steps=len(test_generator),
         shuffle=True,
-        callbacks=[evalutor]   # ,
+        callbacks=[evalutor]
         # callbacks = [earlystop, checkpoint]
     )
 
