@@ -34,7 +34,7 @@ class Config():
         self.epochs = 3
         self.class_nums = 30
         self.maxlen = 256
-        self.batch_size = 32
+        self.batch_size = 16
 
 def count():
     from collections import Counter
