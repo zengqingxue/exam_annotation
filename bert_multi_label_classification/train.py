@@ -159,10 +159,13 @@ if __name__ == '__main__':
     train_data = [[x,y.tolist()] for x,y in zip(train_x,train_y)] # 将相应的样本和标签组成一个tuple
     logger.info(train_data[:3])
     test_data = [[x,y.tolist()] for x,y in zip(test_x,test_y)] # --> [[x1,y1],[x2,y2],[],..]
+    logger.info("train_data,test_data 的长度： {}".format(len(train_data),len(test_data)))
 
     # 转换数据集
     train_generator = data_generator(train_data, batch_size)
     test_generator = data_generator(test_data, batch_size)
+
+    logger.info("转换数据集完成。。。。")
 
     logger.info(model.summary())
 
