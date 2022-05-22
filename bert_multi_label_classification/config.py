@@ -10,9 +10,10 @@
 import os,sys
 cur_dir = os.getcwd()
 parent_dir = os.path.abspath(os.path.join(cur_dir,os.path.pardir))
-model_dir_name = "albert_tiny_google_zh_489k"   # "chinese_L-12_H-768_A-12"  "albert_tiny_google_zh_489k"
-config_path= os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/albert_config.json".format(model_dir_name)))
-checkpoint_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/albert_model.ckpt".format(model_dir_name)))
+model_dir_name = "chinese_L-12_H-768_A-12"   # "chinese_L-12_H-768_A-12"  "albert_tiny_google_zh_489k"
+mode_name = "bert"  # "albert"  "bert"
+config_path= os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/{}_config.json".format(model_dir_name,mode_name)))
+checkpoint_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/{}_model.ckpt".format(model_dir_name,mode_name)))
 dict_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/vocab.txt".format(model_dir_name)))
 
 
@@ -28,8 +29,8 @@ class Config():
         self.test_data =  './data/multi-classification-test.csv'
 
         self.prob_threshold = 0.5
-        self.bert4keras_model_name = "albert"     # "bert" "albert"
-        self.learning_rate = 1e-4     # "bert" "albert"   1e-4  5e-5
+        self.bert4keras_model_name = mode_name   # "bert" "albert"
+        self.learning_rate = 1e-4                # 1e-4  5e-5
         self.epochs = 3
         self.class_nums = 30
         self.maxlen = 256

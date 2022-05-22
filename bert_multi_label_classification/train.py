@@ -91,6 +91,9 @@ class data_generator(DataGenerator):
                 batch_token_ids, batch_segment_ids, batch_labels = [], [], []
 
 def cal_acc(text_list,label_label):
+    """ 只有当pred 与label完全一样时，才cnt+=1 如:
+        pred = [0,1,1,0],label=[0,1,1,0]
+    """
     cnt = 1e-8
     total = len(text_list)
     for text,label in tqdm(zip(text_list,label_label)):
@@ -146,8 +149,8 @@ if __name__ == '__main__':
 
     mlb = MultiLabelBinarizer()
     mlb.fit(train_y)
-    logger.info("标签数量：{}",len(mlb.classes_))
     class_nums = len(mlb.classes_)
+    logger.info("标签数量：{}".format(len(mlb.classes_)))
     pickle.dump(mlb, open(mlb_path,'wb'))
 
     train_y = mlb.transform(train_y) # [[label1,label2],[label3]] --> [[1,1,0],[0,0,1]]
@@ -172,7 +175,7 @@ if __name__ == '__main__':
         # validation_data=test_generator.forfit(),
         # validation_steps=len(test_generator),
         shuffle=True,
-        # callbacks=[evalutor]   # ,
+        callbacks=[evalutor]   # ,
         # callbacks = [earlystop, checkpoint]
     )
 
