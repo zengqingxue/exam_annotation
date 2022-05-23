@@ -10,8 +10,8 @@
 import os,sys
 cur_dir = os.getcwd()
 parent_dir = os.path.abspath(os.path.join(cur_dir,os.path.pardir))
-model_dir_name = "albert_large_google_zh"   # "chinese_L-12_H-768_A-12"  "albert_tiny_google_zh_489k"  "albert_large_google_zh" "albert_large"
-mode_name = "albert"  # "albert"  "bert"
+model_dir_name = "chinese_L-12_H-768_A-12"   # "chinese_L-12_H-768_A-12"  "albert_tiny_google_zh_489k"  "albert_large_google_zh" "albert_large"
+mode_name = "bert"  # "albert"  "bert"
 config_path= os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/{}_config.json".format(model_dir_name,mode_name)))
 checkpoint_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/{}_model.ckpt".format(model_dir_name,mode_name)))
 dict_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/vocab.txt".format(model_dir_name)))
