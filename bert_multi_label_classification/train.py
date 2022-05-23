@@ -165,7 +165,7 @@ if __name__ == '__main__':
     train_generator = data_generator(train_data, batch_size)
     test_generator = data_generator(test_data, batch_size)
 
-    logger.info("转换数据集完成。。。。")
+    logger.info("batch_size: {}, 转换数据集完成。。。。".format(batch_size))
 
     logger.info(model.summary())
 
