@@ -32,7 +32,7 @@ bert4keras_model_name = config.bert4keras_model_name
 epochs = config.epochs
 class_nums = config.class_nums
 maxlen = config.maxlen
-batch_size = config.maxlen
+batch_size = config.batch_size
 train_data = config.train_data
 test_data = config.test_data
 best_model_filepath = config.best_model_filepath
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     train_data = [[x,y.tolist()] for x,y in zip(train_x,train_y)] # 将相应的样本和标签组成一个tuple
     logger.info(train_data[:3])
     test_data = [[x,y.tolist()] for x,y in zip(test_x,test_y)] # --> [[x1,y1],[x2,y2],[],..]
-    logger.info("train_data,test_data 的长度： {}".format(len(train_data),len(test_data)))
+    logger.info("train_data,test_data 的长度： {} {}".format(len(train_data),len(test_data)))
 
     # 转换数据集
     train_generator = data_generator(train_data, batch_size)
