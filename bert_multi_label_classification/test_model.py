@@ -51,27 +51,39 @@
 # encoder.save("test/test.h5")
 # tf.keras.models.save_model(encoder, save_format="tf",filepath= export_path +"+/" +model_version)
 
+#
+# import pandas as pd
+# df1 = pd.DataFrame({
+#     "id":[1,2,3,4],
+#     "label":["A B","B C","C D","E"],
+#     "title":["A1","B1","C1","D1"],
+# })
+#
+# df2 = pd.DataFrame({
+#     "id":[1,2,3],
+#     "label":["A","B","C"],
+#     "title":["A1","B1","C1"],
+# })
+#
+# import pandas as pd
+# d1 = pd.read_csv("../data/news/multi_cls/samples/samples_all.csv",sep="\t",names=['id','label',"content"])
+# d2 = pd.read_csv("../data/news/multi_cls/news_33.csv",sep="\t",names=['id','label',"content"])
+# print("df1, df2: ",df1.shape,df2.shape)
+# print("df1, df2: ",df1,df2)
+# intersected_df = pd.merge(df1, df2, on=['id'], how='inner')
+# intersected_df = intersected_df[['id','label_x','content_x']]
+# intersected_df.to_csv("./",sep="\t",header=None,index=None)
+# # intersected_df = pd.merge(df1, df2, how='inner')
+# print(intersected_df)
+import json
+import time
 
-import pandas as pd
-df1 = pd.DataFrame({
-    "id":[1,2,3,4],
-    "label":["A B","B C","C D","E"],
-    "title":["A1","B1","C1","D1"],
-})
+import requests
 
-df2 = pd.DataFrame({
-    "id":[1,2,3],
-    "label":["A","B","C"],
-    "title":["A1","B1","C1"],
-})
-
-import pandas as pd
-d1 = pd.read_csv("../data/news/multi_cls/samples/samples_all.csv",sep="\t",names=['id','label',"content"])
-d2 = pd.read_csv("../data/news/multi_cls/news_33.csv",sep="\t",names=['id','label',"content"])
-print("df1, df2: ",df1.shape,df2.shape)
-print("df1, df2: ",df1,df2)
-intersected_df = pd.merge(df1, df2, on=['id'], how='inner')
-intersected_df = intersected_df[['id','label_x','content_x']]
-intersected_df.to_csv("./",sep="\t",header=None,index=None)
-# intersected_df = pd.merge(df1, df2, how='inner')
-print(intersected_df)
+a = time.time()
+param= {"text":"淋球菌性尿道炎的症状"}
+url="http://127.0.0.1:60062/service/api/bert_intent_recognize"
+param = json.dumps(param)
+b = requests.post(url=url,json=param,headers={'Content-Type':'application/json'})
+print(json.loads(b.content.decode("utf-8")))
+print(time.time() - a)

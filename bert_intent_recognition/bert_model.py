@@ -55,6 +55,7 @@ def textcnn(inputs,kernel_initializer):
 	output = keras.layers.Dropout(0.2)(output)
 	return output
 
+
 def build_bert_model(config_path,checkpoint_path,class_nums):
 	bert = build_transformer_model(
 		config_path=config_path,
@@ -70,26 +71,26 @@ def build_bert_model(config_path,checkpoint_path,class_nums):
 	# 	lambda x:x[:,1:-1],
 	# 	name='all-token'
 	# 	)(bert.model.output) #shape=[batch_size,maxlen-2,768]
-
+	#
 	# cnn_features = textcnn(
 	# 	all_token_embedding,bert.initializer) #shape=[batch_size,cnn_output_dim]
 	# concat_features = keras.layers.concatenate(
 	# 	[cls_features,cnn_features],
 	# 	axis=-1)
-	concat_features = keras.layers.concatenate(
-		[cls_features],axis=-1)
-
+	#
 	# dense = keras.layers.Dense(
 	# 		units=512,
 	# 		activation='relu',
 	# 		kernel_initializer=bert.initializer
 	# 	)(concat_features)
+	#
+	# output = keras.layers.Dense(
+	# 		units=class_nums,
+	# 		activation='softmax',
+	# 		# activation='sigmoid',  # 多分类模型变多标签模型 softmax --> sigmoid
+	# 		kernel_initializer=bert.initializer
+	# 	)(dense)
 
-	output = keras.layers.Dense(
-			units=class_nums,
-			activation='sigmoid',
-			kernel_initializer=bert.initializer
-		)(concat_features)
 
 	model = keras.models.Model(bert.model.input,output)
 

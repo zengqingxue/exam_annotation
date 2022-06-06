@@ -24,9 +24,9 @@ global graph,model,sess
 from config import Config
 config = Config()
 
-config = tf.ConfigProto()
-config.gpu_options.allow_growth=True
-sess = tf.Session(config=config)
+config1 = tf.ConfigProto()
+config1.gpu_options.allow_growth=True
+sess = tf.Session(config=config1)
 graph = tf.get_default_graph()
 set_session(sess)
 
@@ -34,12 +34,13 @@ class BertIntentModel(object):
     def __init__(self):
         super(BertIntentModel, self).__init__()
         self.dict_path = config.dict_path
-        self.config_path= config.config_path
-        self.checkpoint_path= config.checkpoint_path
+        self.config_path = config.config_path
+        self.checkpoint_path = config.checkpoint_path
 
         self.label_list = [line.strip() for line in open('label','r',encoding='utf8')]
         self.id2label = {idx:label for idx,label in enumerate(self.label_list)}
 
+        self.tokenizer = Tokenizer(self.dict_path)
         self.tokenizer = Tokenizer(self.dict_path)
         self.model = build_bert_model(self.config_path,self.checkpoint_path,len(self.label_list))
         self.model.load_weights('./checkpoint/best_model.weights')
@@ -57,14 +58,15 @@ BIM = BertIntentModel()
 
 if __name__ == '__main__':
     app = flask.Flask(__name__)
-
     @app.route("/service/api/bert_intent_recognize",methods=["GET","POST"])
     def bert_intent_recognize():
         data = {"sucess":0}
+        # print("flask.request: ",flask.request)
         result = None
-        param = flask.request.get_json()
-        print(param)
+        param = json.loads(flask.request.get_json())
+        print("param: {}".format(param))
         text = param["text"]
+        print("服务启动~~~1")
         with graph.as_default():
             set_session(sess)
             result = BIM.predict(text)
@@ -75,8 +77,8 @@ if __name__ == '__main__':
         return flask.jsonify(data)
 
     server = pywsgi.WSGIServer(("0.0.0.0",60062), app)
+    print("服务启动~~~1")
     server.serve_forever()
-
 
     # r = BIM.predict("淋球菌性尿道炎的症状")
     # print(r)

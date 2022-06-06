@@ -31,6 +31,7 @@ batch_size = config.batch_size
 config_path = config.config_path
 checkpoint_path = config.checkpoint_path
 dict_path = config.dict_path
+best_model_filepath = config.best_model_filepath
 # endregion
 
 tokenizer = Tokenizer(dict_path)
@@ -62,11 +63,14 @@ if __name__ == '__main__':
     test_generator = data_generator(test_data, batch_size)
 
     model = build_bert_model(config_path,checkpoint_path,class_nums)
+    model.load_weights("./checkpoint/best_model.weights")
+
+
     print(model.summary())
     model.compile(
-        # loss='sparse_categorical_crossentropy',
-        loss='sparse_categorical_crossentropy',
-        optimizer=Adam(5e-6),
+        loss='sparse_categorical_crossentropy',  # 单标签多分类损失函数
+        # loss='binary_crossentropy',  # 多标签分类的损失函数，二分类交叉熵损失函数
+        optimizer=Adam(config.learning_rate),
         metrics=['accuracy'],
     )
 
@@ -76,7 +80,7 @@ if __name__ == '__main__':
         verbose=2,
         mode='min'
         )
-    best_model_filepath = './checkpoint/best_model.weights'
+
     checkpoint = keras.callbacks.ModelCheckpoint(
         best_model_filepath,
         monitor='val_loss',
@@ -88,7 +92,7 @@ if __name__ == '__main__':
     model.fit_generator(
         train_generator.forfit(),
         steps_per_epoch=len(train_generator),
-        epochs=10,
+        epochs=config.epochs,
         validation_data=test_generator.forfit(),
         validation_steps=len(test_generator),
         shuffle=True,

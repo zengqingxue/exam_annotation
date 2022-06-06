@@ -22,11 +22,12 @@ class Config():
         self.config_path = config_path
         self.checkpoint_path = checkpoint_path
         self.dict_path = dict_path
-        self.mlb_path =  './checkpoint/mlb.pkl'
-        self.best_model_filepath =  './checkpoint/best_model.weights'
-        self.h5_path =  './checkpoint/best_model.h5'
+        self.mlb_path = 'checkpoint/bert_mlb.pkl'
+        self.best_model_filepath = 'checkpoint/bert_best_model.weights'
+        self.h5_path =  './checkpoint/bert_best_model.h5'
+
         self.train_data =  './data/multi-classification-train.csv'
-        self.test_data =  './data/multi-classification-test.csv'
+        self.test_data =  './data/multi-classification-test.csv.10w'
 
         self.prob_threshold = 0.5
         self.bert4keras_model_name = mode_name   # "bert" "albert"
