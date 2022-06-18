@@ -23,6 +23,7 @@ from keras.models import load_model
 from data_helper import load_data
 from loguru import logger
 logger.add('./logs/my.log', format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> - {module} - {function} - {level} - line:{line} - {message}", level="INFO",rotation='00:00',retention="3 day")
+from keras.models import model_from_json
 
 from config import Config
 config = Config()
@@ -36,7 +37,9 @@ maxlen = config.maxlen
 batch_size = config.batch_size
 train_data_file = config.train_data
 test_data_file = config.test_data
+valid_data_file = config.valid_data
 best_model_filepath = config.best_model_filepath
+learning_rate = config.learning_rate
 h5_path = config.h5_path
 mlb_path = config.mlb_path
 prob_threshold = config.prob_threshold
@@ -133,29 +136,34 @@ class Evaluator(keras.callbacks.Callback):
         if self.stopped_epoch > 0:
             logger.info('Epoch %05d: early stopping' % (self.stopped_epoch + 1))
 
-model = build_bert_model(config_path,checkpoint_path,class_nums)
-
-def data_deal(train_data_file,test_data_file):
+model = build_bert_model(config_path, checkpoint_path, class_nums)
+def data_deal(train_data_file,test_data_file,valid_data_file):
     # 加载数据集
     train_x, train_y = load_data(train_data_file)
-    test_x, test_y = load_data(test_data_file)
+    # test_x, test_y = load_data(test_data_file)
+    valid_x, valid_y = load_data(valid_data_file)
 
     shuffle_index = [i for i in range(len(train_x))]
-    random.shuffle(shuffle_index)
+    # random.shuffle(shuffle_index)  # 这里不需打乱，打乱反而会导致mlb.classes_.tolist()问题
     train_x = [train_x[i] for i in shuffle_index]
     train_y = [train_y[i] for i in shuffle_index]
 
-    mlb = MultiLabelBinarizer()
-    mlb.fit(train_y)
-    logger.info("标签数量：{} {}".format(len(mlb.classes_),config.class_nums))
-    pickle.dump(mlb, open(mlb_path, 'wb'))
+    if os.path.exists(config.mlb_path):
+        mlb = pickle.load(open(config.mlb_path, 'rb'))
+        logger.info("mlb.classes_.tolist()：{} {}",len(mlb.classes_.tolist()),mlb.classes_.tolist())
+    else:
+        mlb = MultiLabelBinarizer()
+        mlb.fit(train_y)
+        logger.info("标签数量：{} {}".format(len(mlb.classes_),config.class_nums))
+        pickle.dump(mlb, open(mlb_path, 'wb'))
 
     train_y = mlb.transform(train_y)  # [[label1,label2],[label3]] --> [[1,1,0],[0,0,1]]
-    test_y = mlb.transform(test_y)
+    # test_y = mlb.transform(test_y)
+    valid_y = mlb.transform(valid_y)
 
     train_data = [[x, y.tolist()] for x, y in zip(train_x, train_y)]  # 将相应的样本和标签组成一个tuple
-    logger.info(train_data[:3])
-    test_data = [[x, y.tolist()] for x, y in zip(test_x, test_y)]  # --> [[x1,y1],[x2,y2],[],..]
+    logger.info("train_data[:3]: {}",train_data[:3])
+    test_data = [[x, y.tolist()] for x, y in zip(valid_x, valid_y)]  # --> [[x1,y1],[x2,y2],[],..]
     logger.info("train_data,test_data 的长度： {} {}".format(len(train_data), len(test_data)))
 
     # 转换数据集
@@ -166,20 +174,51 @@ def data_deal(train_data_file,test_data_file):
 
     return train_generator,test_generator,test_data
 
-def train_save_model(model):
+def train_save_model(model,train_generator,test_generator):
     # evalutor = Evaluator()
+    earlystop = keras.callbacks.EarlyStopping(
+        monitor='val_loss',
+        patience=2,
+        verbose=2,
+        mode='min'
+    )
+
+    checkpoint = keras.callbacks.ModelCheckpoint(
+        best_model_filepath,
+        monitor='val_loss',
+        verbose=1,
+        save_best_only=True,
+        mode='min'
+    )
+
     model.fit_generator(
         train_generator.forfit(),
         steps_per_epoch=len(train_generator),
-        epochs=epochs,
-        # validation_data=test_generator.forfit(),
-        # validation_steps=len(test_generator),
+        epochs=config.epochs,
+        validation_data=test_generator.forfit(),
+        validation_steps=len(test_generator),
         shuffle=True,
-        # callbacks=[evalutor]
-        # callbacks = [earlystop, checkpoint]
+        callbacks=[earlystop, checkpoint]
     )
+    # model.fit_generator(
+    #     train_generator.forfit(),
+    #     steps_per_epoch=len(train_generator),
+    #     epochs=epochs,
+    #     # validation_data=test_generator.forfit(),
+    #     # validation_steps=len(test_generator),
+    #     shuffle=True,
+    #     # callbacks=[evalutor]
+    #     # callbacks = [earlystop, checkpoint]
+    # )
 
-    model.save_weights(best_model_filepath)
+    # 模型保存成Json文件
+
+
+    # 保存模型
+    model_json = model.to_json()
+    with open(config.model_json_path, 'w') as file:
+        file.write(model_json)
+    # model.save_weights(best_model_filepath) # 这里不保存，上面ModelCheckpoint已保存
     model.save(config.h5_path)
     logger.info("保存hd模型成功！")
 
@@ -205,11 +244,13 @@ def load_and_eval():
 
 if __name__ == '__main__':  # 导包使用时，不会运行这个if里的东西,自然也不会导入这里面的任何变量
     s1 = time.time()
+    train_generator,test_generator,test_data = data_deal(train_data_file, test_data_file,valid_data_file)
 
-    train_generator,test_generator,test_data = data_deal(train_data_file, test_data_file)
+    if os.path.exists(best_model_filepath):
+        model.load_weights(config.best_model_filepath)  # 加载权重，没有返回值！！！
 
     logger.info(model.summary())
-    train_save_model(model)
+    train_save_model(model,train_generator,test_generator)
 
     ss = time.time()
     logger.info("训练耗时：{} min",(ss - s1) / 60)

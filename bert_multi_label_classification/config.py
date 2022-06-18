@@ -10,8 +10,8 @@
 import os,sys
 cur_dir = os.getcwd()
 parent_dir = os.path.abspath(os.path.join(cur_dir,os.path.pardir))
-model_dir_name = "chinese_L-12_H-768_A-12"   # "chinese_L-12_H-768_A-12"  "albert_tiny_google_zh_489k"  "albert_large_google_zh" "albert_large"
-mode_name = "bert"  # "albert"  "bert"
+model_dir_name = "albert_tiny_google_zh_489k"   # "chinese_L-12_H-768_A-12"  "albert_tiny_google_zh_489k"  "albert_large_google_zh" "albert_large"
+mode_name = "albert"  # "albert"  "bert"
 config_path= os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/{}_config.json".format(model_dir_name,mode_name)))
 checkpoint_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/{}_model.ckpt".format(model_dir_name,mode_name)))
 dict_path = os.path.abspath(os.path.join(parent_dir,"bert_multi_label/pretrained_model/{}/vocab.txt".format(model_dir_name)))
@@ -25,14 +25,18 @@ class Config():
         self.mlb_path = 'checkpoint/bert_mlb.pkl'
         self.best_model_filepath = 'checkpoint/bert_best_model.weights'
         self.h5_path =  './checkpoint/bert_best_model.h5'
+        self.model_json_path = './checkpoint/bert_best_model.json'
 
+        # self.train_data =  './data/multi-classification-train.csv'
+        # self.test_data =  './data/multi-classification-test.csv.10w'
         self.train_data =  './data/multi-classification-train.csv'
-        self.test_data =  './data/multi-classification-test.csv.10w'
+        self.test_data =  './data/multi-classification-test.csv'
+        self.valid_data =  './data/multi-classification-valid.csv'
 
         self.prob_threshold = 0.5
         self.bert4keras_model_name = mode_name   # "bert" "albert"
         self.learning_rate = 1e-4                # 1e-4  5e-5
-        self.epochs = 3
+        self.epochs = 30
         self.class_nums = 30
         self.maxlen = 256
         self.batch_size = 64
@@ -46,7 +50,6 @@ if __name__ == '__main__':
     # print("checkpoint_path: ",checkpoint_path)
     # print("dict_path: ",dict_path)
     pass
-    count()
 
 
 

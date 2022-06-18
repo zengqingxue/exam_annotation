@@ -49,6 +49,8 @@ def textcnn(inputs,kernel_initializer):
         [cnn1,cnn2,cnn3],
         axis=-1) #[batch_size,256*3]
 
+    output = keras.layers.Dropout(0.2)(output)
+
     return output
 
 def build_bert_model(config_path,checkpoint_path,class_nums):
@@ -68,7 +70,7 @@ def build_bert_model(config_path,checkpoint_path,class_nums):
         )(bert.model.output) #shape=[batch_size,maxlen-2,768]
 
     cnn_features = textcnn(
-      all_token_embedding,'he_normal') #shape=[batch_size,cnn_output_dim]
+      all_token_embedding,bert.initializer) #shape=[batch_size,cnn_output_dim] ,bert.initializer 'he_normal'
     concat_features = keras.layers.concatenate(
       [cls_features,cnn_features],
       axis=-1)
@@ -77,13 +79,13 @@ def build_bert_model(config_path,checkpoint_path,class_nums):
     dense = keras.layers.Dense(
           units=256,
           activation='relu',
-          kernel_initializer='he_normal'
+          kernel_initializer=bert.initializer  # 'he_normal'
       )(concat_features)
 
     output = keras.layers.Dense(
             units=class_nums,
             activation='sigmoid', # 多分类模型变多标签模型 softmax --> sigmoid
-            kernel_initializer='he_normal'
+            kernel_initializer=bert.initializer   # 'he_normal' bert.initializer
         )(dense)
 
     # output = keras.layers.Dense(
@@ -99,7 +101,6 @@ def build_bert_model(config_path,checkpoint_path,class_nums):
         optimizer=Adam(learning_rate),
         metrics=['accuracy'],
     )
-
     return model
 
 if __name__ == '__main__':
