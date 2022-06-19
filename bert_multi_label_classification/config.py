@@ -35,7 +35,7 @@ class Config():
 
         self.prob_threshold = 0.5
         self.bert4keras_model_name = mode_name   # "bert" "albert"
-        self.learning_rate = 1e-4                # 1e-4  5e-5
+        self.learning_rate = 5e-5                # 1e-4  5e-5
         self.epochs = 30
         self.class_nums = 30
         self.maxlen = 256
