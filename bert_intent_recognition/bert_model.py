@@ -60,36 +60,36 @@ def build_bert_model(config_path,checkpoint_path,class_nums):
 	bert = build_transformer_model(
 		config_path=config_path,
 		checkpoint_path=checkpoint_path,
-		model='bert',
+		model='albert',
 		return_keras_model=False)
 
 	cls_features = keras.layers.Lambda(
 		lambda x:x[:,0],
 		name='cls-token'
 		)(bert.model.output) #shape=[batch_size,768]
-	# all_token_embedding = keras.layers.Lambda(
-	# 	lambda x:x[:,1:-1],
-	# 	name='all-token'
-	# 	)(bert.model.output) #shape=[batch_size,maxlen-2,768]
-	#
-	# cnn_features = textcnn(
-	# 	all_token_embedding,bert.initializer) #shape=[batch_size,cnn_output_dim]
-	# concat_features = keras.layers.concatenate(
-	# 	[cls_features,cnn_features],
-	# 	axis=-1)
-	#
-	# dense = keras.layers.Dense(
-	# 		units=512,
-	# 		activation='relu',
-	# 		kernel_initializer=bert.initializer
-	# 	)(concat_features)
-	#
-	# output = keras.layers.Dense(
-	# 		units=class_nums,
-	# 		activation='softmax',
-	# 		# activation='sigmoid',  # 多分类模型变多标签模型 softmax --> sigmoid
-	# 		kernel_initializer=bert.initializer
-	# 	)(dense)
+	all_token_embedding = keras.layers.Lambda(
+		lambda x:x[:,1:-1],
+		name='all-token'
+		)(bert.model.output) #shape=[batch_size,maxlen-2,768]
+
+	cnn_features = textcnn(
+		all_token_embedding,bert.initializer) #shape=[batch_size,cnn_output_dim]
+	concat_features = keras.layers.concatenate(
+		[cls_features,cnn_features],
+		axis=-1)
+
+	dense = keras.layers.Dense(
+			units=512,
+			activation='relu',
+			kernel_initializer=bert.initializer
+		)(concat_features)
+
+	output = keras.layers.Dense(
+			units=class_nums,
+			activation='softmax',
+			# activation='sigmoid',  # 多分类模型变多标签模型 softmax --> sigmoid
+			kernel_initializer=bert.initializer
+		)(dense)
 
 
 	model = keras.models.Model(bert.model.input,output)

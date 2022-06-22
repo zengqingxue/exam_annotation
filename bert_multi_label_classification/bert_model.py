@@ -64,35 +64,35 @@ def build_bert_model(config_path,checkpoint_path,class_nums):
         lambda x:x[:,0],
         name='cls-token'
         )(bert.model.output) #shape=[batch_size,768]
-    all_token_embedding = keras.layers.Lambda(
-        lambda x:x[:,1:-1],
-        name='all-token'
-        )(bert.model.output) #shape=[batch_size,maxlen-2,768]
+    # all_token_embedding = keras.layers.Lambda(
+    #     lambda x:x[:,1:-1],
+    #     name='all-token'
+    #     )(bert.model.output) #shape=[batch_size,maxlen-2,768]
 
-    cnn_features = textcnn(
-      all_token_embedding,bert.initializer) #shape=[batch_size,cnn_output_dim] ,bert.initializer 'he_normal'
-    concat_features = keras.layers.concatenate(
-      [cls_features,cnn_features],
-      axis=-1)
-
-    concat_features = keras.layers.Dropout(0.2)(concat_features)
-    dense = keras.layers.Dense(
-          units=256,
-          activation='relu',
-          kernel_initializer=bert.initializer  # 'he_normal'
-      )(concat_features)
+    # cnn_features = textcnn(
+    #   all_token_embedding,bert.initializer) #shape=[batch_size,cnn_output_dim] ,bert.initializer 'he_normal'
+    # concat_features = keras.layers.concatenate(
+    #   [cls_features,cnn_features],
+    #   axis=-1)
+    #
+    # concat_features = keras.layers.Dropout(0.2)(concat_features)
+    # dense = keras.layers.Dense(
+    #       units=256,
+    #       activation='relu',
+    #       kernel_initializer=bert.initializer  # 'he_normal'
+    #   )(concat_features)
+    #
+    # output = keras.layers.Dense(
+    #         units=class_nums,
+    #         activation='sigmoid', # 多分类模型变多标签模型 softmax --> sigmoid
+    #         kernel_initializer=bert.initializer   # 'he_normal' bert.initializer
+    #     )(dense)
 
     output = keras.layers.Dense(
-            units=class_nums,
-            activation='sigmoid', # 多分类模型变多标签模型 softmax --> sigmoid
-            kernel_initializer=bert.initializer   # 'he_normal' bert.initializer
-        )(dense)
-
-    # output = keras.layers.Dense(
-    #     units=class_nums,
-    #     activation='sigmoid',  # 多分类模型变多标签模型 softmax --> sigmoid
-    #     kernel_initializer='he_normal'
-    # )(cls_features)
+        units=class_nums,
+        activation='sigmoid',  # 多分类模型变多标签模型 softmax --> sigmoid
+        kernel_initializer=bert.initializer  # 'he_normal'
+    )(cls_features)
 
     model = keras.models.Model(bert.model.input,output)
     model.compile(

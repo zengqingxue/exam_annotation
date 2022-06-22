@@ -63,8 +63,8 @@ if __name__ == '__main__':
     test_generator = data_generator(test_data, batch_size)
 
     model = build_bert_model(config_path,checkpoint_path,class_nums)
-    model.load_weights("./checkpoint/best_model.weights")
-
+    # model.load_weights("./checkpoint/best_model.weights")
+    model.load_weights(best_model_filepath)
 
     print(model.summary())
     model.compile(
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     earlystop = keras.callbacks.EarlyStopping(
         monitor='val_loss',
-        patience=3,
+        patience=1,
         verbose=2,
         mode='min'
         )
